@@ -1,0 +1,42 @@
+{
+  "author": "Vedant Chainani <vedant@envoy1084.xyz>",
+  "bugs": {
+    "url": "https://github.com/envoy1084/yellow-rpc/issues"
+  },
+  "description": "",
+  "devDependencies": {
+    "@effect/vitest": "^0.27.0",
+    "@types/node": "^25.1.0",
+    "@yellow-rpc/config": "workspace:*",
+    "tsdown": "^0.20.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/envoy1084/yellow-rpc#readme",
+  "keywords": [],
+  "license": "MIT",
+  "name": "@yellow-rpc/package-template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/envoy1084/yellow-rpc"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "vitest",
+    "test": "vitest run"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.0.0"
+}
