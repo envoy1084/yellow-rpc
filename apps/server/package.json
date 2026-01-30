@@ -9,8 +9,7 @@
     "@yellow-rpc/api": "workspace:*",
     "@yellow-rpc/database": "workspace:*",
     "dotenv": "^17.2.3",
-    "effect": "^3.19.15",
-    "iovalkey": "^0.3.3"
+    "effect": "^3.19.15"
   },
   "description": "",
   "devDependencies": {
