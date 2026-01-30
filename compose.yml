@@ -1,0 +1,29 @@
+services:
+  redis:
+    # Uses the absolute latest version available on Docker Hub
+    image: valkey/valkey:9-alpine
+    container_name: yellow-rpc-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    command: valkey-server --appendonly yes --appendfsync everysec --save ""
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  redis-ui:
+    image: redis/redisinsight:latest
+    container_name: yellow-rpc-ui
+    volumes:
+      - ./insight-data:/data
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
+networks:
+  default:
+    driver: bridge
