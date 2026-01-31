@@ -23,11 +23,11 @@ export type RedisBitmapShape = {
 };
 
 export const makeRedisBitmap = (c: RedisClientType): RedisBitmapShape => ({
-  bitCount: effectify(c.bitCount),
-  bitField: effectify(c.bitField),
-  bitFieldRo: effectify(c.bitFieldRo),
-  bitOp: effectify(c.bitOp),
-  bitPos: effectify(c.bitPos),
-  getBit: effectify(c.getBit),
-  setBit: effectify(c.setBit),
+  bitCount: effectify(c.bitCount.bind(c)),
+  bitField: effectify(c.bitField.bind(c)),
+  bitFieldRo: effectify(c.bitFieldRo.bind(c)),
+  bitOp: effectify(c.bitOp.bind(c)),
+  bitPos: effectify(c.bitPos.bind(c)),
+  getBit: effectify(c.getBit.bind(c)),
+  setBit: effectify(c.setBit.bind(c)),
 });

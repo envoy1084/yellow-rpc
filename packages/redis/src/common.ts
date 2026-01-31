@@ -8,12 +8,9 @@ export type Effectify<
   E = RedisError,
 > = (...args: Parameters<F>) => Effect.Effect<Awaited<ReturnType<F>>, E>;
 
-export const effectify = <
-  F extends (...args: any[]) => Promise<any>,
-  E = RedisError,
->(
+export const effectify = <F extends (...args: any[]) => Promise<any>>(
   fn: F,
-): Effectify<F, E> => {
+): Effectify<F> => {
   return ((...args: Parameters<F>) =>
     Effect.tryPromise({
       catch: (e) => new RedisError({ cause: e }),

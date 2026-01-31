@@ -1,6 +1,6 @@
 services:
   redis:
-    image: valkey/valkey:9-alpine
+    image: valkey/valkey-bundle:latest
     container_name: yellow-rpc-redis
     restart: always
     ports:
