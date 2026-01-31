@@ -1,12 +1,12 @@
-import {
-  DatabaseConfig,
-  type DatabaseConfigValues,
-} from "@yellow-rpc/database";
-import { type Config, ConfigProvider, Context, Layer } from "effect";
+import { Config, ConfigProvider, Context, Layer, type Redacted } from "effect";
 
-type EnvValues = DatabaseConfigValues;
+type EnvValues = {
+  readonly redisUrl: Redacted.Redacted<string>;
+};
 
-const envConfig: Config.Config<EnvValues> = DatabaseConfig;
+const envConfig: Config.Config<EnvValues> = Config.all({
+  redisUrl: Config.redacted("REDIS_URL"),
+});
 
 export class Env extends Context.Tag("Auth")<Env, EnvValues>() {}
 
@@ -18,8 +18,7 @@ export const EnvLive = Layer.merge(
 export const EnvTest = Layer.merge(
   Layer.setConfigProvider(
     ConfigProvider.fromJson({
-      host: "localhost",
-      port: 6379,
+      redisUrl: "redis://localhost:6379",
     }),
   ),
   Layer.effect(Env, envConfig),
