@@ -2,9 +2,11 @@ import { RedisCore, type RedisError } from "@yellow-rpc/redis";
 import { Context, Effect, Layer, type Option, Schema } from "effect";
 import merge from "lodash.merge";
 
+import { toMutable } from "@/common";
+
 import { type User, UserSchema } from "./schema";
 
-class UserRepository extends Context.Tag("UserRepository")<
+export class UserRepository extends Context.Tag("UserRepository")<
   UserRepository,
   {
     getUser: (
@@ -17,15 +19,6 @@ class UserRepository extends Context.Tag("UserRepository")<
     ) => Effect.Effect<void, RedisError>;
   }
 >() {}
-
-type Mutable<T> = T extends readonly (infer U)[]
-  ? U[]
-  : T extends object
-    ? { -readonly [K in keyof T]: Mutable<T[K]> }
-    : T;
-
-const toMutable = <T>(value: T): Mutable<T> =>
-  structuredClone(value) as Mutable<T>;
 
 export const UserRepositoryLive = Layer.effect(
   UserRepository,

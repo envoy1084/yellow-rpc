@@ -1,5 +1,8 @@
 import { createTsdownConfig } from "@yellow-rpc/config/tsdown";
 
 export default createTsdownConfig({
-  entry: ["src/index.ts"],
+  entry: {
+    apiKey: ["./src/api-key/index.ts"],
+    user: ["./src/user/index.ts"],
+  },
 });
