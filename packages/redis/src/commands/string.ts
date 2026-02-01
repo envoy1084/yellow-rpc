@@ -28,58 +28,56 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisStringShape = {
-  append: Effectify<RedisClientType["append"]>;
-  decr: Effectify<RedisClientType["decr"]>;
-  decrBy: Effectify<RedisClientType["decrBy"]>;
-  delEx: Effectify<RedisClientType["delEx"]>;
-  digest: Effectify<RedisClientType["digest"]>;
-  get: Effectify<RedisClientType["get"]>;
-  getDel: Effectify<RedisClientType["getDel"]>;
-  getEx: Effectify<RedisClientType["getEx"]>;
-  getRange: Effectify<RedisClientType["getRange"]>;
-  getSet: Effectify<RedisClientType["getSet"]>;
-  incr: Effectify<RedisClientType["incr"]>;
-  incrBy: Effectify<RedisClientType["incrBy"]>;
-  incrByFloat: Effectify<RedisClientType["incrByFloat"]>;
-  lcs: Effectify<RedisClientType["lcs"]>;
-  mGet: Effectify<RedisClientType["mGet"]>;
-  mSet: Effectify<RedisClientType["mSet"]>;
-  mSetEx: Effectify<RedisClientType["mSetEx"]>;
-  mSetNX: Effectify<RedisClientType["mSetNX"]>;
-  pSetEx: Effectify<RedisClientType["pSetEx"]>;
-  set: Effectify<RedisClientType["set"]>;
-  setEx: Effectify<RedisClientType["setEx"]>;
-  setNX: Effectify<RedisClientType["setNX"]>;
-  setRange: Effectify<RedisClientType["setRange"]>;
-  strLen: Effectify<RedisClientType["strLen"]>;
-};
+const redisStringKeys = [
+  "append",
+  "decr",
+  "decrBy",
+  "delEx",
+  "digest",
+  "get",
+  "getDel",
+  "getEx",
+  "getRange",
+  "getSet",
+  "incr",
+  "incrBy",
+  "incrByFloat",
+  "lcs",
+  "mGet",
+  "mSet",
+  "mSetEx",
+  "mSetNX",
+  "pSetEx",
+  "set",
+  "setEx",
+  "setNX",
+  "setRange",
+  "strLen",
+  // "substr", // TODO: Not Supported
+] as const;
 
-export const makeRedisString = (c: RedisClientType): RedisStringShape => ({
-  append: effectify(c.append.bind(c)),
-  decr: effectify(c.decr.bind(c)),
-  decrBy: effectify(c.decrBy.bind(c)),
-  delEx: effectify(c.delEx.bind(c)),
-  digest: effectify(c.digest.bind(c)),
-  get: effectify(c.get.bind(c)),
-  getDel: effectify(c.getDel.bind(c)),
-  getEx: effectify(c.getEx.bind(c)),
-  getRange: effectify(c.getRange.bind(c)),
-  getSet: effectify(c.getSet.bind(c)),
-  incr: effectify(c.incr.bind(c)),
-  incrBy: effectify(c.incrBy.bind(c)),
-  incrByFloat: effectify(c.incrByFloat.bind(c)),
-  lcs: effectify(c.lcs.bind(c)),
-  mGet: effectify(c.mGet.bind(c)),
-  mSet: effectify(c.mSet.bind(c)),
-  mSetEx: effectify(c.mSetEx.bind(c)),
-  mSetNX: effectify(c.mSetNX.bind(c)),
-  pSetEx: effectify(c.pSetEx.bind(c)),
-  set: effectify(c.set.bind(c)),
-  setEx: effectify(c.setEx.bind(c)),
-  setNX: effectify(c.setNX.bind(c)),
-  setRange: effectify(c.setRange.bind(c)),
-  strLen: effectify(c.strLen.bind(c)),
-});
+export type RedisStringAsync = CommandGroup<
+  RedisClientType,
+  typeof redisStringKeys,
+  "async"
+>;
+
+export type RedisStringQueue = CommandGroup<
+  RedisClientType,
+  typeof redisStringKeys,
+  "queue"
+>;
+
+export const makeRedisString = (client: RedisClientType): RedisStringAsync =>
+  makeCommandGroup(client, redisStringKeys, AsyncExec);
+
+export const makeRedisStringQueue = (
+  client: RedisClientType,
+): RedisStringQueue => makeCommandGroup(client, redisStringKeys, QueueExec);

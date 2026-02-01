@@ -10,24 +10,38 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisBitmapShape = {
-  bitCount: Effectify<RedisClientType["bitCount"]>;
-  bitField: Effectify<RedisClientType["bitField"]>;
-  bitFieldRo: Effectify<RedisClientType["bitFieldRo"]>;
-  bitOp: Effectify<RedisClientType["bitOp"]>;
-  bitPos: Effectify<RedisClientType["bitPos"]>;
-  getBit: Effectify<RedisClientType["getBit"]>;
-  setBit: Effectify<RedisClientType["setBit"]>;
-};
+const redisBitmapKeys = [
+  "bitCount",
+  "bitField",
+  "bitFieldRo",
+  "bitOp",
+  "bitPos",
+  "getBit",
+  "setBit",
+] as const;
 
-export const makeRedisBitmap = (c: RedisClientType): RedisBitmapShape => ({
-  bitCount: effectify(c.bitCount.bind(c)),
-  bitField: effectify(c.bitField.bind(c)),
-  bitFieldRo: effectify(c.bitFieldRo.bind(c)),
-  bitOp: effectify(c.bitOp.bind(c)),
-  bitPos: effectify(c.bitPos.bind(c)),
-  getBit: effectify(c.getBit.bind(c)),
-  setBit: effectify(c.setBit.bind(c)),
-});
+export type RedisBitmapAsync = CommandGroup<
+  RedisClientType,
+  typeof redisBitmapKeys,
+  "async"
+>;
+
+export type RedisBitmapQueue = CommandGroup<
+  RedisClientType,
+  typeof redisBitmapKeys,
+  "queue"
+>;
+
+export const makeRedisBitmap = (client: RedisClientType): RedisBitmapAsync =>
+  makeCommandGroup(client, redisBitmapKeys, AsyncExec);
+
+export const makeRedisBitmapQueue = (
+  client: RedisClientType,
+): RedisBitmapQueue => makeCommandGroup(client, redisBitmapKeys, QueueExec);

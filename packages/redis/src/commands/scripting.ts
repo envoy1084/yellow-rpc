@@ -22,50 +22,53 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisScriptingShape = {
-  eval: Effectify<RedisClientType["eval"]>;
-  evalSha: Effectify<RedisClientType["evalSha"]>;
-  evalShaRo: Effectify<RedisClientType["evalShaRo"]>;
-  evalRo: Effectify<RedisClientType["evalRo"]>;
-  fcall: Effectify<RedisClientType["fCall"]>;
-  fcallRo: Effectify<RedisClientType["fCallRo"]>;
-  functionDelete: Effectify<RedisClientType["functionDelete"]>;
-  functionDump: Effectify<RedisClientType["functionDump"]>;
-  functionFlush: Effectify<RedisClientType["functionFlush"]>;
-  functionKill: Effectify<RedisClientType["functionKill"]>;
-  functionList: Effectify<RedisClientType["functionList"]>;
-  functionLoad: Effectify<RedisClientType["functionLoad"]>;
-  functionRestore: Effectify<RedisClientType["functionRestore"]>;
-  functionStats: Effectify<RedisClientType["functionStats"]>;
-  scriptDebug: Effectify<RedisClientType["scriptDebug"]>;
-  scriptExists: Effectify<RedisClientType["scriptExists"]>;
-  scriptFlush: Effectify<RedisClientType["scriptFlush"]>;
-  scriptKill: Effectify<RedisClientType["scriptKill"]>;
-  scriptLoad: Effectify<RedisClientType["scriptLoad"]>;
-};
+const redisScriptingKeys = [
+  "eval",
+  "evalSha",
+  "evalShaRo",
+  "evalRo",
+  "fCall",
+  "fCallRo",
+  "functionDelete",
+  "functionDump",
+  "functionFlush",
+  "functionKill",
+  "functionList",
+  "functionLoad",
+  "functionRestore",
+  "functionStats",
+  "scriptDebug",
+  "scriptExists",
+  "scriptFlush",
+  "scriptKill",
+  "scriptLoad",
+] as const;
+
+export type RedisScriptingAsync = CommandGroup<
+  RedisClientType,
+  typeof redisScriptingKeys,
+  "async"
+>;
+
+export type RedisScriptingQueue = CommandGroup<
+  RedisClientType,
+  typeof redisScriptingKeys,
+  "queue"
+>;
 
 export const makeRedisScripting = (
-  c: RedisClientType,
-): RedisScriptingShape => ({
-  eval: effectify(c.eval.bind(c)),
-  evalRo: effectify(c.evalRo.bind(c)),
-  evalSha: effectify(c.evalSha.bind(c)),
-  evalShaRo: effectify(c.evalShaRo.bind(c)),
-  fcall: effectify(c.fCall.bind(c)),
-  fcallRo: effectify(c.fCallRo.bind(c)),
-  functionDelete: effectify(c.functionDelete.bind(c)),
-  functionDump: effectify(c.functionDump.bind(c)),
-  functionFlush: effectify(c.functionFlush.bind(c)),
-  functionKill: effectify(c.functionKill.bind(c)),
-  functionList: effectify(c.functionList.bind(c)),
-  functionLoad: effectify(c.functionLoad.bind(c)),
-  functionRestore: effectify(c.functionRestore.bind(c)),
-  functionStats: effectify(c.functionStats.bind(c)),
-  scriptDebug: effectify(c.scriptDebug.bind(c)),
-  scriptExists: effectify(c.scriptExists.bind(c)),
-  scriptFlush: effectify(c.scriptFlush.bind(c)),
-  scriptKill: effectify(c.scriptKill.bind(c)),
-  scriptLoad: effectify(c.scriptLoad.bind(c)),
-});
+  client: RedisClientType,
+): RedisScriptingAsync =>
+  makeCommandGroup(client, redisScriptingKeys, AsyncExec);
+
+export const makeRedisScriptingQueue = (
+  client: RedisClientType,
+): RedisScriptingQueue =>
+  makeCommandGroup(client, redisScriptingKeys, QueueExec);

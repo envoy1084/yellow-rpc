@@ -38,76 +38,66 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisSortedSetShape = {
-  zAdd: Effectify<RedisClientType["zAdd"]>;
-  zCard: Effectify<RedisClientType["zCard"]>;
-  zCount: Effectify<RedisClientType["zCount"]>;
-  zDiff: Effectify<RedisClientType["zDiff"]>;
-  zDiffStore: Effectify<RedisClientType["zDiffStore"]>;
-  zIncrBy: Effectify<RedisClientType["zIncrBy"]>;
-  zInter: Effectify<RedisClientType["zInter"]>;
-  zInterCard: Effectify<RedisClientType["zInterCard"]>;
-  zInterStore: Effectify<RedisClientType["zInterStore"]>;
-  zLexCount: Effectify<RedisClientType["zLexCount"]>;
-  zmPop: Effectify<RedisClientType["zmPop"]>;
-  zmScore: Effectify<RedisClientType["zmScore"]>;
-  zPopMax: Effectify<RedisClientType["zPopMax"]>;
-  zPopMin: Effectify<RedisClientType["zPopMin"]>;
-  zRandMember: Effectify<RedisClientType["zRandMember"]>;
-  zRange: Effectify<RedisClientType["zRange"]>;
-  zRangeByLex: Effectify<RedisClientType["zRangeByLex"]>;
-  zRangeByScore: Effectify<RedisClientType["zRangeByScore"]>;
-  zRangeStore: Effectify<RedisClientType["zRangeStore"]>;
-  zRank: Effectify<RedisClientType["zRank"]>;
-  zRem: Effectify<RedisClientType["zRem"]>;
-  zRemRangeByLex: Effectify<RedisClientType["zRemRangeByLex"]>;
-  zRemRangeByRank: Effectify<RedisClientType["zRemRangeByRank"]>;
-  zRemRangeByScore: Effectify<RedisClientType["zRemRangeByScore"]>;
-  //   zRevRange: Effectify<RedisClientType["zRevRange"]>; // TODO: Not Supported
-  //   zRevRangeByLex: Effectify<RedisClientType["zRevRangeByLex"]>; // TODO: Not Supported
-  //   zRevRangeByScore: Effectify<RedisClientType["zRevRangeByScore"]>; // TODO: Not Supported
-  zRevRank: Effectify<RedisClientType["zRevRank"]>;
-  zScan: Effectify<RedisClientType["zScan"]>;
-  zScore: Effectify<RedisClientType["zScore"]>;
-  zUnion: Effectify<RedisClientType["zUnion"]>;
-  zUnionStore: Effectify<RedisClientType["zUnionStore"]>;
-};
+const redisSortedSetKeys = [
+  "zAdd",
+  "zCard",
+  "zCount",
+  "zDiff",
+  "zDiffStore",
+  "zIncrBy",
+  "zInter",
+  "zInterCard",
+  "zInterStore",
+  "zLexCount",
+  "zmPop",
+  "zmScore",
+  "zPopMax",
+  "zPopMin",
+  "zRandMember",
+  "zRange",
+  "zRangeByLex",
+  "zRangeByScore",
+  "zRangeStore",
+  "zRank",
+  "zRem",
+  "zRemRangeByLex",
+  "zRemRangeByRank",
+  "zRemRangeByScore",
+  //   zRevRange, // TODO: Not Supported
+  //   zRevRangeByLex, // TODO: Not Supported
+  //   zRevRangeByScore, // TODO: Not Supported
+  "zRevRank",
+  "zScan",
+  "zScore",
+  "zUnion",
+  "zUnionStore",
+] as const;
+
+export type RedisSortedSetAsync = CommandGroup<
+  RedisClientType,
+  typeof redisSortedSetKeys,
+  "async"
+>;
+
+export type RedisSortedSetQueue = CommandGroup<
+  RedisClientType,
+  typeof redisSortedSetKeys,
+  "queue"
+>;
 
 export const makeRedisSortedSet = (
-  c: RedisClientType,
-): RedisSortedSetShape => ({
-  zAdd: effectify(c.zAdd.bind(c)),
-  zCard: effectify(c.zCard.bind(c)),
-  zCount: effectify(c.zCount.bind(c)),
-  zDiff: effectify(c.zDiff.bind(c)),
-  zDiffStore: effectify(c.zDiffStore.bind(c)),
-  zIncrBy: effectify(c.zIncrBy.bind(c)),
-  zInter: effectify(c.zInter.bind(c)),
-  zInterCard: effectify(c.zInterCard.bind(c)),
-  zInterStore: effectify(c.zInterStore.bind(c)),
-  zLexCount: effectify(c.zLexCount.bind(c)),
-  zmPop: effectify(c.zmPop.bind(c)),
-  zmScore: effectify(c.zmScore.bind(c)),
-  zPopMax: effectify(c.zPopMax.bind(c)),
-  zPopMin: effectify(c.zPopMin.bind(c)),
-  zRandMember: effectify(c.zRandMember.bind(c)),
-  zRange: effectify(c.zRange.bind(c)),
-  zRangeByLex: effectify(c.zRangeByLex.bind(c)),
-  zRangeByScore: effectify(c.zRangeByScore.bind(c)),
-  zRangeStore: effectify(c.zRangeStore.bind(c)),
-  zRank: effectify(c.zRank.bind(c)),
-  zRem: effectify(c.zRem.bind(c)),
-  zRemRangeByLex: effectify(c.zRemRangeByLex.bind(c)),
-  zRemRangeByRank: effectify(c.zRemRangeByRank.bind(c)),
-  zRemRangeByScore: effectify(c.zRemRangeByScore.bind(c)),
-  //   zRevRange: effectify(c.zRevRange.bind(c)), // TODO: Not Supported
-  //   zRevRangeByLex: effectify(c.zRevRangeByLex.bind(c)), // TODO: Not Supported
-  //   zRevRangeByScore: effectify(c.zRevRangeByScore.bind(c)), // TODO: Not Supported
-  zRevRank: effectify(c.zRevRank.bind(c)),
-  zScan: effectify(c.zScan.bind(c)),
-  zScore: effectify(c.zScore.bind(c)),
-  zUnion: effectify(c.zUnion.bind(c)),
-  zUnionStore: effectify(c.zUnionStore.bind(c)),
-});
+  client: RedisClientType,
+): RedisSortedSetAsync =>
+  makeCommandGroup(client, redisSortedSetKeys, AsyncExec);
+
+export const makeRedisSortedSetQueue = (
+  client: RedisClientType,
+): RedisSortedSetQueue =>
+  makeCommandGroup(client, redisSortedSetKeys, QueueExec);

@@ -25,52 +25,51 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisListShape = {
-  blMove: Effectify<RedisClientType["blMove"]>;
-  blmPop: Effectify<RedisClientType["blmPop"]>;
-  blPop: Effectify<RedisClientType["blPop"]>;
-  brPop: Effectify<RedisClientType["brPop"]>;
-  brPopLPush: Effectify<RedisClientType["brPopLPush"]>;
-  lIndex: Effectify<RedisClientType["lIndex"]>;
-  lInsert: Effectify<RedisClientType["lInsert"]>;
-  lLen: Effectify<RedisClientType["lLen"]>;
-  lMove: Effectify<RedisClientType["lMove"]>;
-  lPop: Effectify<RedisClientType["lPop"]>;
-  lPos: Effectify<RedisClientType["lPos"]>;
-  lPush: Effectify<RedisClientType["lPush"]>;
-  lPushX: Effectify<RedisClientType["lPushX"]>;
-  lRange: Effectify<RedisClientType["lRange"]>;
-  lRem: Effectify<RedisClientType["lRem"]>;
-  lSet: Effectify<RedisClientType["lSet"]>;
-  lTrim: Effectify<RedisClientType["lTrim"]>;
-  rPop: Effectify<RedisClientType["rPop"]>;
-  rPopLPush: Effectify<RedisClientType["rPopLPush"]>;
-  rPush: Effectify<RedisClientType["rPush"]>;
-  rPushX: Effectify<RedisClientType["rPushX"]>;
-};
+const redisListKeys = [
+  "blMove",
+  "blmPop",
+  "blPop",
+  "brPop",
+  "brPopLPush",
+  "lIndex",
+  "lInsert",
+  "lLen",
+  "lMove",
+  "lPop",
+  "lPos",
+  "lPush",
+  "lPushX",
+  "lRange",
+  "lRem",
+  "lSet",
+  "lTrim",
+  "rPop",
+  "rPopLPush",
+  "rPush",
+  "rPushX",
+] as const;
 
-export const makeRedisList = (c: RedisClientType): RedisListShape => ({
-  blMove: effectify(c.blMove.bind(c)),
-  blmPop: effectify(c.blmPop.bind(c)),
-  blPop: effectify(c.blPop.bind(c)),
-  brPop: effectify(c.brPop.bind(c)),
-  brPopLPush: effectify(c.brPopLPush.bind(c)),
-  lIndex: effectify(c.lIndex.bind(c)),
-  lInsert: effectify(c.lInsert.bind(c)),
-  lLen: effectify(c.lLen.bind(c)),
-  lMove: effectify(c.lMove.bind(c)),
-  lPop: effectify(c.lPop.bind(c)),
-  lPos: effectify(c.lPos.bind(c)),
-  lPush: effectify(c.lPush.bind(c)),
-  lPushX: effectify(c.lPushX.bind(c)),
-  lRange: effectify(c.lRange.bind(c)),
-  lRem: effectify(c.lRem.bind(c)),
-  lSet: effectify(c.lSet.bind(c)),
-  lTrim: effectify(c.lTrim.bind(c)),
-  rPop: effectify(c.rPop.bind(c)),
-  rPopLPush: effectify(c.rPopLPush.bind(c)),
-  rPush: effectify(c.rPush.bind(c)),
-  rPushX: effectify(c.rPushX.bind(c)),
-});
+export type RedisListAsync = CommandGroup<
+  RedisClientType,
+  typeof redisListKeys,
+  "async"
+>;
+
+export type RedisListQueue = CommandGroup<
+  RedisClientType,
+  typeof redisListKeys,
+  "queue"
+>;
+
+export const makeRedisList = (client: RedisClientType): RedisListAsync =>
+  makeCommandGroup(client, redisListKeys, AsyncExec);
+
+export const makeRedisListQueue = (client: RedisClientType): RedisListQueue =>
+  makeCommandGroup(client, redisListKeys, QueueExec);

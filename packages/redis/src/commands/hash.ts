@@ -31,66 +31,58 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisHashShape = {
-  hDel: Effectify<RedisClientType["hDel"]>;
-  hExists: Effectify<RedisClientType["hExists"]>;
-  hExpire: Effectify<RedisClientType["hExpire"]>;
-  hExpireAt: Effectify<RedisClientType["hExpireAt"]>;
-  hExpireTime: Effectify<RedisClientType["hExpireTime"]>;
-  hGet: Effectify<RedisClientType["hGet"]>;
-  hGetAll: Effectify<RedisClientType["hGetAll"]>;
-  hGetDel: Effectify<RedisClientType["hGetDel"]>;
-  hGetEx: Effectify<RedisClientType["hGetEx"]>;
-  hIncrBy: Effectify<RedisClientType["hIncrBy"]>;
-  hIncrByFloat: Effectify<RedisClientType["hIncrByFloat"]>;
-  hKeys: Effectify<RedisClientType["hKeys"]>;
-  hLen: Effectify<RedisClientType["hLen"]>;
-  hmGet: Effectify<RedisClientType["hmGet"]>;
-  //   hmSet: Effectify<RedisClientType['hmSet']>; // Not Supported
-  hPersist: Effectify<RedisClientType["hPersist"]>;
-  hpExpire: Effectify<RedisClientType["hpExpire"]>;
-  hpExpireAt: Effectify<RedisClientType["hpExpireAt"]>;
-  hpExpireTime: Effectify<RedisClientType["hpExpireTime"]>;
-  hpTTL: Effectify<RedisClientType["hpTTL"]>;
-  hRandField: Effectify<RedisClientType["hRandField"]>;
-  hScan: Effectify<RedisClientType["hScan"]>;
-  hSet: Effectify<RedisClientType["hSet"]>;
-  hSetEx: Effectify<RedisClientType["hSetEx"]>;
-  hSetNX: Effectify<RedisClientType["hSetNX"]>;
-  hStrLen: Effectify<RedisClientType["hStrLen"]>;
-  hTTL: Effectify<RedisClientType["hTTL"]>;
-  hVals: Effectify<RedisClientType["hVals"]>;
-};
+const redisHashKeys = [
+  "hDel",
+  "hExists",
+  "hExpire",
+  "hExpireAt",
+  "hExpireTime",
+  "hGet",
+  "hGetAll",
+  "hGetDel",
+  "hGetEx",
+  "hIncrBy",
+  "hIncrByFloat",
+  "hKeys",
+  "hLen",
+  "hmGet",
+  // hmSet, // TODO: Not Supported
+  "hPersist",
+  "hpExpire",
+  "hpExpireAt",
+  "hpExpireTime",
+  "hpTTL",
+  "hRandField",
+  "hScan",
+  "hSet",
+  "hSetEx",
+  "hSetNX",
+  "hStrLen",
+  "hTTL",
+  "hVals",
+] as const;
 
-export const makeRedisHash = (c: RedisClientType): RedisHashShape => ({
-  hDel: effectify(c.hDel.bind(c)),
-  hExists: effectify(c.hExists.bind(c)),
-  hExpire: effectify(c.hExpire.bind(c)),
-  hExpireAt: effectify(c.hExpireAt.bind(c)),
-  hExpireTime: effectify(c.hExpireTime.bind(c)),
-  hGet: effectify(c.hGet.bind(c)),
-  hGetAll: effectify(c.hGetAll.bind(c)),
-  hGetDel: effectify(c.hGetDel.bind(c)),
-  hGetEx: effectify(c.hGetEx.bind(c)),
-  hIncrBy: effectify(c.hIncrBy.bind(c)),
-  hIncrByFloat: effectify(c.hIncrByFloat.bind(c)),
-  hKeys: effectify(c.hKeys.bind(c)),
-  hLen: effectify(c.hLen.bind(c)),
-  hmGet: effectify(c.hmGet.bind(c)),
-  //   hmSet: effectify(c.hmSet.bind(c)), // Not Supported
-  hPersist: effectify(c.hPersist.bind(c)),
-  hpExpire: effectify(c.hpExpire.bind(c)),
-  hpExpireAt: effectify(c.hpExpireAt.bind(c)),
-  hpExpireTime: effectify(c.hpExpireTime.bind(c)),
-  hpTTL: effectify(c.hpTTL.bind(c)),
-  hRandField: effectify(c.hRandField.bind(c)),
-  hScan: effectify(c.hScan.bind(c)),
-  hSet: effectify(c.hSet.bind(c)),
-  hSetEx: effectify(c.hSetEx.bind(c)),
-  hSetNX: effectify(c.hSetNX.bind(c)),
-  hStrLen: effectify(c.hStrLen.bind(c)),
-  hTTL: effectify(c.hTTL.bind(c)),
-  hVals: effectify(c.hVals.bind(c)),
-});
+export type RedisHashAsync = CommandGroup<
+  RedisClientType,
+  typeof redisHashKeys,
+  "async"
+>;
+
+export type RedisHashQueue = CommandGroup<
+  RedisClientType,
+  typeof redisHashKeys,
+  "queue"
+>;
+
+export const makeRedisHash = (client: RedisClientType): RedisHashAsync =>
+  makeCommandGroup(client, redisHashKeys, AsyncExec);
+
+export const makeRedisHashQueue = (client: RedisClientType): RedisHashQueue =>
+  makeCommandGroup(client, redisHashKeys, QueueExec);

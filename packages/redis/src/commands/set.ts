@@ -20,44 +20,47 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisSetShape = {
-  sAdd: Effectify<RedisClientType["sAdd"]>;
-  sCard: Effectify<RedisClientType["sCard"]>;
-  sDiff: Effectify<RedisClientType["sDiff"]>;
-  sDiffStore: Effectify<RedisClientType["sDiffStore"]>;
-  sInter: Effectify<RedisClientType["sInter"]>;
-  sInterCard: Effectify<RedisClientType["sInterCard"]>;
-  sInterStore: Effectify<RedisClientType["sInterStore"]>;
-  sIsMember: Effectify<RedisClientType["sIsMember"]>;
-  sMembers: Effectify<RedisClientType["sMembers"]>;
-  smIsMember: Effectify<RedisClientType["smIsMember"]>;
-  sMove: Effectify<RedisClientType["sMove"]>;
-  sPop: Effectify<RedisClientType["sPop"]>;
-  sRandMember: Effectify<RedisClientType["sRandMember"]>;
-  sRem: Effectify<RedisClientType["sRem"]>;
-  sScan: Effectify<RedisClientType["sScan"]>;
-  sUnion: Effectify<RedisClientType["sUnion"]>;
-  sUnionStore: Effectify<RedisClientType["sUnionStore"]>;
-};
+const redisSetKeys = [
+  "sAdd",
+  "sCard",
+  "sDiff",
+  "sDiffStore",
+  "sInter",
+  "sInterCard",
+  "sInterStore",
+  "sIsMember",
+  "sMembers",
+  "smIsMember",
+  "sMove",
+  "sPop",
+  "sRandMember",
+  "sRem",
+  "sScan",
+  "sUnion",
+  "sUnionStore",
+] as const;
 
-export const makeRedisSet = (c: RedisClientType): RedisSetShape => ({
-  sAdd: effectify(c.sAdd.bind(c)),
-  sCard: effectify(c.sCard.bind(c)),
-  sDiff: effectify(c.sDiff.bind(c)),
-  sDiffStore: effectify(c.sDiffStore.bind(c)),
-  sInter: effectify(c.sInter.bind(c)),
-  sInterCard: effectify(c.sInterCard.bind(c)),
-  sInterStore: effectify(c.sInterStore.bind(c)),
-  sIsMember: effectify(c.sIsMember.bind(c)),
-  sMembers: effectify(c.sMembers.bind(c)),
-  sMove: effectify(c.sMove.bind(c)),
-  smIsMember: effectify(c.smIsMember.bind(c)),
-  sPop: effectify(c.sPop.bind(c)),
-  sRandMember: effectify(c.sRandMember.bind(c)),
-  sRem: effectify(c.sRem.bind(c)),
-  sScan: effectify(c.sScan.bind(c)),
-  sUnion: effectify(c.sUnion.bind(c)),
-  sUnionStore: effectify(c.sUnionStore.bind(c)),
-});
+export type RedisSetAsync = CommandGroup<
+  RedisClientType,
+  typeof redisSetKeys,
+  "async"
+>;
+
+export type RedisSetQueue = CommandGroup<
+  RedisClientType,
+  typeof redisSetKeys,
+  "queue"
+>;
+
+export const makeRedisSet = (client: RedisClientType): RedisSetAsync =>
+  makeCommandGroup(client, redisSetKeys, AsyncExec);
+
+export const makeRedisSetQueue = (client: RedisClientType): RedisSetQueue =>
+  makeCommandGroup(client, redisSetKeys, QueueExec);

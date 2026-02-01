@@ -28,60 +28,55 @@
 
 import type { RedisClientType } from "redis";
 
-import { type Effectify, effectify } from "../common";
+import {
+  AsyncExec,
+  type CommandGroup,
+  makeCommandGroup,
+  QueueExec,
+} from "@/helpers";
 
-export type RedisJsonShape = {
-  arrAppend: Effectify<RedisClientType["json"]["arrAppend"]>;
-  arrIndex: Effectify<RedisClientType["json"]["arrIndex"]>;
-  arrInsert: Effectify<RedisClientType["json"]["arrInsert"]>;
-  arrLen: Effectify<RedisClientType["json"]["arrLen"]>;
-  arrPop: Effectify<RedisClientType["json"]["arrPop"]>;
-  arrTrim: Effectify<RedisClientType["json"]["arrTrim"]>;
-  clear: Effectify<RedisClientType["json"]["clear"]>;
-  //   debug: Effectify<RedisClientType["json"]["debug"]>; // TODO: Not Supported
-  debugMemory: Effectify<RedisClientType["json"]["debugMemory"]>;
-  del: Effectify<RedisClientType["json"]["del"]>;
-  forget: Effectify<RedisClientType["json"]["forget"]>;
-  get: Effectify<RedisClientType["json"]["get"]>;
-  merge: Effectify<RedisClientType["json"]["merge"]>;
-  mGet: Effectify<RedisClientType["json"]["mGet"]>;
-  mSet: Effectify<RedisClientType["json"]["mSet"]>;
-  numIncrBy: Effectify<RedisClientType["json"]["numIncrBy"]>;
-  numMultBy: Effectify<RedisClientType["json"]["numMultBy"]>;
-  objKeys: Effectify<RedisClientType["json"]["objKeys"]>;
-  objLen: Effectify<RedisClientType["json"]["objLen"]>;
-  //   resp: Effectify<RedisClientType["json"]["resp"]>; // TODO: Not Supported
-  set: Effectify<RedisClientType["json"]["set"]>;
-  strAppend: Effectify<RedisClientType["json"]["strAppend"]>;
-  strLen: Effectify<RedisClientType["json"]["strLen"]>;
-  toggle: Effectify<RedisClientType["json"]["toggle"]>;
-  type: Effectify<RedisClientType["json"]["type"]>;
-};
+const redisJsonKeys = [
+  "arrAppend",
+  "arrIndex",
+  "arrInsert",
+  "arrLen",
+  "arrPop",
+  "arrTrim",
+  "clear",
+  // debug, // TODO: Not Supported
+  "debugMemory",
+  "del",
+  "forget",
+  "get",
+  "merge",
+  "mGet",
+  "mSet",
+  "numIncrBy",
+  "numMultBy",
+  "objKeys",
+  "objLen",
+  // resp, // TODO: Not Supported
+  "set",
+  "strAppend",
+  "strLen",
+  "toggle",
+  "type",
+] as const;
 
-export const makeRedisJson = (c: RedisClientType): RedisJsonShape => ({
-  arrAppend: effectify(c.json.arrAppend.bind(c)),
-  arrIndex: effectify(c.json.arrIndex.bind(c)),
-  arrInsert: effectify(c.json.arrInsert.bind(c)),
-  arrLen: effectify(c.json.arrLen.bind(c)),
-  arrPop: effectify(c.json.arrPop.bind(c)),
-  arrTrim: effectify(c.json.arrTrim.bind(c)),
-  clear: effectify(c.json.clear.bind(c)),
-  //   debug: effectify(c.json.debug.bind(c)), // TODO: Not Supported
-  debugMemory: effectify(c.json.debugMemory.bind(c)),
-  del: effectify(c.json.del.bind(c)),
-  forget: effectify(c.json.forget.bind(c)),
-  get: effectify(c.json.get.bind(c)),
-  merge: effectify(c.json.merge.bind(c)),
-  mGet: effectify(c.json.mGet.bind(c)),
-  mSet: effectify(c.json.mSet.bind(c)),
-  numIncrBy: effectify(c.json.numIncrBy.bind(c)),
-  numMultBy: effectify(c.json.numMultBy.bind(c)),
-  objKeys: effectify(c.json.objKeys.bind(c)),
-  objLen: effectify(c.json.objLen.bind(c)),
-  //   resp: effectify(c.json.resp.bind(c)), // TODO: Not Supported
-  set: effectify(c.json.set.bind(c)),
-  strAppend: effectify(c.json.strAppend.bind(c)),
-  strLen: effectify(c.json.strLen.bind(c)),
-  toggle: effectify(c.json.toggle.bind(c)),
-  type: effectify(c.json.type.bind(c)),
-});
+export type RedisJsonAsync = CommandGroup<
+  RedisClientType["json"],
+  typeof redisJsonKeys,
+  "async"
+>;
+
+export type RedisJsonQueue = CommandGroup<
+  RedisClientType["json"],
+  typeof redisJsonKeys,
+  "queue"
+>;
+
+export const makeRedisJson = (client: RedisClientType): RedisJsonAsync =>
+  makeCommandGroup(client.json, redisJsonKeys, AsyncExec);
+
+export const makeRedisJsonQueue = (client: RedisClientType): RedisJsonQueue =>
+  makeCommandGroup(client.json, redisJsonKeys, QueueExec);
