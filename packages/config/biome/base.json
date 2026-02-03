@@ -39,7 +39,7 @@
   },
   "css": {
     "formatter": {
-      "enabled": false
+      "enabled": true
     },
     "parser": { "tailwindDirectives": true }
   },
