@@ -4,6 +4,9 @@
     "url": "https://github.com/envoy1084/yellow-rpc/issues"
   },
   "dependencies": {
+    "@effect/platform": "^0.94.2",
+    "@effect/platform-node": "^0.104.1",
+    "@effect/rpc": "^0.73.0",
     "@erc7824/nitrolite": "^0.5.3",
     "dotenv": "^17.2.3",
     "effect": "^3.19.15",

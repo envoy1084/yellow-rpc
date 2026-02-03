@@ -22,6 +22,8 @@ export const AppSessionSchema = Schema.Struct({
   sessionPrivateKey: Schema.String,
   // Session Public Key
   sessionPublicKey: Schema.String,
+  // status
+  status: Schema.Literal("open", "closed", "challenged"),
   // User Balance
   userBalance: Schema.Number,
 });

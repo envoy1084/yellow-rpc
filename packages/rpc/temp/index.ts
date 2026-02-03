@@ -97,7 +97,7 @@ const updateMessage = await createSubmitAppStateMessage(
 );
 
 const updateMessageJson = JSON.parse(updateMessage);
-console.log("Updating App Session...", updateMessageJson);
+console.log("Updating App Session...");
 
 // Admin signs the update message
 const sigUpdate = await session1.sessionKey.signer(updateMessageJson.req);
@@ -107,12 +107,10 @@ const updateMessageSigned = {
   sig: [sigUpdate, ...updateMessageJson.sig],
 };
 
-console.log("Update Message Signed: ", updateMessageSigned);
+console.log("Update Message Signed");
 
-const resUpdate = await clientUser.sendMessage(
-  JSON.stringify(updateMessageSigned),
-);
-console.log("App Session Updated: ", resUpdate);
+await clientUser.sendMessage(JSON.stringify(updateMessageSigned));
+console.log("App Session Updated");
 
 await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -136,5 +134,5 @@ console.log("Closing App Session...");
 const sig2 = await session1.sessionKey.signer(closeMessageJson.req);
 closeMessageJson.sig.push(sig2);
 
-const resClose = await clientUser.sendMessage(JSON.stringify(closeMessageJson));
+await clientUser.sendMessage(JSON.stringify(closeMessageJson));
 console.log("Closed App Session");
