@@ -1,4 +1,4 @@
-import { RedisConnection, RedisCoreLive } from "@yellow-rpc/redis";
+import { layerWithOptions, RedisCoreLive } from "@envoy1084/effect-redis";
 import { Effect, Layer, Redacted } from "effect";
 
 import { Env, EnvLive, EnvTest } from "./env";
@@ -10,7 +10,7 @@ const RedisLayer = RedisCoreLive.pipe(
       Effect.gen(function* () {
         const config = yield* Env;
 
-        return RedisConnection.layerWithOptions({
+        return layerWithOptions({
           url: Redacted.value(config.redisUrl),
         });
       }),

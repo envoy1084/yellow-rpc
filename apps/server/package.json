@@ -6,8 +6,8 @@
   "dependencies": {
     "@effect/platform": "^0.94.2",
     "@effect/platform-node": "^0.104.1",
+    "@envoy1084/effect-redis": "^0.0.2",
     "@yellow-rpc/api": "workspace:*",
-    "@yellow-rpc/redis": "workspace:*",
     "dotenv": "^17.2.3",
     "effect": "^3.19.15"
   },
