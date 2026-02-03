@@ -1,8 +1,6 @@
-import { RedisCore, type RedisError } from "@yellow-rpc/redis";
-import { Context, Effect, Layer, type Option, Schema } from "effect";
+import { RedisCore, type RedisError } from "@envoy1084/effect-redis";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 import merge from "lodash.merge";
-
-import { toMutable } from "@/common";
 
 import { type User, UserSchema } from "./schema";
 
@@ -31,21 +29,25 @@ export const UserRepositoryLive = Layer.effect(
       createUser: (user) =>
         Effect.gen(function* () {
           const key = `${suffix}:${user.walletAddress}`;
-          yield* redis.json.set(key, "$", toMutable(user));
+          const value = Schema.encodeSync(UserSchema)(user);
+          yield* redis.hSet(key, value);
         }),
       getUser: (walletAddress) =>
         Effect.gen(function* () {
           const key = `${suffix}:${walletAddress}`;
-          const res = yield* redis.json.get(key);
+          const res = yield* redis.hGetAll(key);
           return Schema.decodeUnknownOption(UserSchema)(res);
         }),
       updateUser: (walletAddress, changes) =>
         Effect.gen(function* () {
           const key = `${suffix}:${walletAddress}`;
-          const res = yield* redis.json.get(key);
+          const res = yield* redis.get(key);
           const user = Schema.decodeUnknownOption(UserSchema)(res);
-          const newUser = merge(user, changes);
-          yield* redis.json.set(key, "$", toMutable(newUser));
+          if (Option.isNone(user)) return;
+          const newUser = Schema.encodeSync(UserSchema)(
+            merge(user.value, changes),
+          );
+          yield* redis.hSet(key, newUser);
         }),
     });
   }),

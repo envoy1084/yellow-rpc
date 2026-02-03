@@ -1,10 +1,10 @@
 import { Schema } from "effect";
+import { DateFromString } from "effect/Schema";
 
 export const UserSchema = Schema.Struct({
-  apiKeys: Schema.Array(Schema.String),
-  createdAt: Schema.Date,
+  createdAt: DateFromString,
   id: Schema.String,
-  updatedAt: Schema.Date,
+  updatedAt: DateFromString,
   walletAddress: Schema.String.pipe(
     Schema.pattern(/^0x[a-fA-F0-9]{40}$/),
   ).annotations({

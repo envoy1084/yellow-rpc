@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@effect/platform": "^0.94.2",
-    "@yellow-rpc/redis": "workspace:*",
+    "@envoy1084/effect-redis": "^0.0.2",
     "effect": "^3.19.15",
     "lodash.merge": "^4.6.2"
   },

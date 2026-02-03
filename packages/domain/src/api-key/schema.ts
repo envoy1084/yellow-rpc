@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { DateFromString } from "effect/Schema";
 
 export const SupportedChainSchema = Schema.Union(
   Schema.Literal("ethereum"),
@@ -15,7 +16,7 @@ export const ApiKeySchema = Schema.Struct({
   // Reference to the channel created for this API Key
   channelId: Schema.String,
   // CreatedAt timestamp
-  createdAt: Schema.DateFromString,
+  createdAt: DateFromString,
   // Primary Key
   id: Schema.String,
   // The hashed key
@@ -24,8 +25,10 @@ export const ApiKeySchema = Schema.Struct({
   name: Schema.String,
   // Start characters to show in frontend
   start: Schema.String,
+  // Status of the API Key
+  status: Schema.Literal("active", "expired", "inactive"),
   // UpdatedAt timestamp
-  updatedAt: Schema.DateFromString,
+  updatedAt: DateFromString,
   // Reference to Owner
   userId: Schema.String,
 });
