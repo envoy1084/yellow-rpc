@@ -9,7 +9,9 @@ const DashboardLayout = () => {
       <AppSidebar />
       <div className="flex h-full w-full flex-col">
         <DashboardNavbar />
-        <Outlet />
+        <div className="py-[5dvh] px-4">
+          <Outlet />
+        </div>
       </div>
     </SidebarProvider>
   );

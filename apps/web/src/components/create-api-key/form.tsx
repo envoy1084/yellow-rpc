@@ -8,11 +8,26 @@ import {
 import { format } from "date-fns";
 import { Controller, useForm } from "react-hook-form";
 
+import { BaseIcon, EthereumIcon, OptimismIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -21,13 +36,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { BaseIcon, EthereumIcon, OptimismIcon } from "./icons";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
-import { Input } from "./ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const chains = [
   {
@@ -47,7 +55,7 @@ const chains = [
   },
 ];
 
-export const CreateKeyForm = () => {
+export const CreateApiKeyForm = () => {
   const form = useForm<
     PrepareApiKeyRequestEncoded,
     unknown,
