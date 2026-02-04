@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "@effect/platform": "^0.94.2",
+    "@yellow-rpc/schema": "workspace:*",
     "effect": "^3.19.15"
   },
   "description": "",

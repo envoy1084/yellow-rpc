@@ -1,7 +1,10 @@
 import { RedisCore, type RedisError } from "@envoy1084/effect-redis";
+import {
+  type ApiKey,
+  ApiKeySchema,
+  type CreateApiKeyRequest,
+} from "@yellow-rpc/schema";
 import { Context, Effect, Layer, type Option, Schema } from "effect";
-
-import { type ApiKey, ApiKeySchema } from "./schema";
 
 export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
   ApiKeyRepository,
@@ -12,7 +15,7 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
     ) => Effect.Effect<Option.Option<ApiKey>, RedisError>;
     createApiKey: (
       walletAddress: string,
-      data: ApiKey,
+      data: CreateApiKeyRequest,
     ) => Effect.Effect<void, RedisError>;
     updateApiKey: (
       walletAddress: string,
@@ -35,10 +38,21 @@ export const ApiKeyRepositoryLive = Layer.effect(
     return ApiKeyRepository.of({
       createApiKey: (walletAddress, data) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${walletAddress}:${data.id}`;
+          const apiKey: ApiKey = {
+            ...data,
+            appSessionId: undefined,
+            createdAt: new Date(),
+            id: "", // TODO: Generate a unique id
+            key: "", // TODO: Generate a unique key
+            ownerAddress: walletAddress,
+            start: "", // TODO: Generate a unique start
+            status: "inactive",
+            updatedAt: new Date(),
+          };
+          const key = `${suffix}:${walletAddress}:${apiKey.id}`;
           const arrKey = `user:${walletAddress}:api_keys`;
-          yield* redis.sAdd(arrKey, data.id);
-          const encoded = Schema.encodeSync(ApiKeySchema)(data);
+          yield* redis.sAdd(arrKey, apiKey.id);
+          const encoded = Schema.encodeSync(ApiKeySchema)(apiKey);
           yield* redis.hSet(key, encoded);
         }),
       deleteApiKey: (id, walletAddress) =>

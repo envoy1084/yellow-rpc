@@ -22,8 +22,5 @@
     "class:list"
   ],
   "tailwindCSS.classFunctions": ["tw", "clsx", "cva"],
-  "tailwindCSS.experimental.configFile": {
-    "packages/ui/src/styles/globals.css": ["apps/**", "packages/**"]
-  },
   "typescript.tsdk": "node_modules/typescript/lib"
 }

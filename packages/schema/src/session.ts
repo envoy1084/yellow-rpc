@@ -1,14 +1,5 @@
 import { Schema } from "effect";
 
-export const SupportedChainSchema = Schema.Union(
-  Schema.Literal("ethereum"),
-  Schema.Literal("sepolia"),
-  Schema.Literal("base_sepolia"),
-  Schema.Literal("base"),
-);
-
-export type SupportedChain = typeof SupportedChainSchema.Type;
-
 export const AppSessionSchema = Schema.Struct({
   // Admin Balance
   adminBalance: Schema.Number,

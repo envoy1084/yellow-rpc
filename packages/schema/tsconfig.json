@@ -8,10 +8,5 @@
   },
   "exclude": ["node_modules", "dist"],
   "extends": "@yellow-rpc/config/tsconfig/library/node",
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../schema/src/apiKey.ts",
-    "../schema/src/session.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

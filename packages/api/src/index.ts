@@ -10,3 +10,5 @@ export const api = HttpApi.make("YellowRpcAPI")
     name: "MIT",
     url: "https://opensource.org/licenses/MIT",
   });
+
+export * from "./dto";

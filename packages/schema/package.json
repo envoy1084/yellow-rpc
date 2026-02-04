@@ -4,16 +4,11 @@
     "url": "https://github.com/envoy1084/yellow-rpc/issues"
   },
   "dependencies": {
-    "@effect/platform": "^0.94.2",
-    "@envoy1084/effect-redis": "^0.0.2",
-    "@yellow-rpc/schema": "workspace:*",
-    "effect": "^3.19.15",
-    "lodash.merge": "^4.6.2"
+    "effect": "^3.19.15"
   },
   "description": "",
   "devDependencies": {
     "@effect/vitest": "^0.27.0",
-    "@types/lodash.merge": "^4.6.9",
     "@types/node": "^25.1.0",
     "@yellow-rpc/config": "workspace:*",
     "tsdown": "^0.20.1",
@@ -24,14 +19,6 @@
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.mts"
-    },
-    "./apiKey": {
-      "import": "./dist/apiKey.mjs",
-      "types": "./dist/apiKey.d.mts"
-    },
-    "./user": {
-      "import": "./dist/user.mjs",
-      "types": "./dist/user.d.mts"
     }
   },
   "files": [
@@ -42,7 +29,7 @@
   "homepage": "https://github.com/envoy1084/yellow-rpc#readme",
   "keywords": [],
   "license": "MIT",
-  "name": "@yellow-rpc/domain",
+  "name": "@yellow-rpc/schema",
   "repository": {
     "type": "git",
     "url": "https://github.com/envoy1084/yellow-rpc"

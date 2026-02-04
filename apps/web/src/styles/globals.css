@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+/* @import "shadcn/tailwind.css"; */
 
 :root {
   --background: oklch(0.9865 0.0029 84.559);
@@ -197,4 +197,8 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+}
+
+@utility reset-input-number {
+  @apply [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield];
 }
