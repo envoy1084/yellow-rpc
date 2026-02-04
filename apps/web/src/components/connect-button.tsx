@@ -16,7 +16,11 @@ export const ConnectButton = () => {
   const connectors = useConnectors();
   const { mutateAsync: disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
-  const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
+  const { data: ensAvatar } = useEnsAvatar({
+    // biome-ignore lint/style/noNonNullAssertion: safe
+    name: ensName!,
+    query: { enabled: Boolean(ensName) },
+  });
 
   const handleConnection = async () => {
     if (address) {
