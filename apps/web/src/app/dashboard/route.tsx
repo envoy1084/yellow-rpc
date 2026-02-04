@@ -1,14 +1,14 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { AppSidebar } from "@/components/sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar, DashboardNavbar } from "@/components";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const DashboardLayout = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
       <div className="flex h-full w-full flex-col">
-        <SidebarTrigger />
+        <DashboardNavbar />
         <Outlet />
       </div>
     </SidebarProvider>

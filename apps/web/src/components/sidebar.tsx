@@ -58,8 +58,19 @@ export const AppSidebar = () => {
               return (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
-                    render={<Link to={item.href} />}
-                    tooltip={item.tooltip}
+                    render={
+                      <Link
+                        activeOptions={{
+                          exact: false,
+                        }}
+                        activeProps={{
+                          className:
+                            "bg-primary hover:bg-primary! text-primary-foreground hover:text-primary-foreground!",
+                        }}
+                        to={item.href}
+                      />
+                    }
+                    // tooltip={item.tooltip}
                   >
                     <item.icon />
                     <span>{item.label}</span>
