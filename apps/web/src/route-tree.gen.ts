@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from "./app/__root";
 import { Route as DashboardRouteRouteImport } from "./app/dashboard/route";
 import { Route as IndexRouteImport } from "./app/index";
 import { Route as DashboardIndexRouteImport } from "./app/dashboard/index";
+import { Route as DashboardApiKeysRouteImport } from "./app/dashboard/api-keys";
+import { Route as DashboardAnalyticsRouteImport } from "./app/dashboard/analytics";
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: "/dashboard",
@@ -28,28 +30,55 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: "/",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardApiKeysRoute = DashboardApiKeysRouteImport.update({
+  id: "/api-keys",
+  path: "/api-keys",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: "/analytics",
+  path: "/analytics",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
+  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
+  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
   "/dashboard/": typeof DashboardIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
+  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
   "/dashboard": typeof DashboardIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
+  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
+  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
   "/dashboard/": typeof DashboardIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/dashboard" | "/dashboard/";
+  fullPaths:
+    | "/"
+    | "/dashboard"
+    | "/dashboard/analytics"
+    | "/dashboard/api-keys"
+    | "/dashboard/";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/dashboard";
-  id: "__root__" | "/" | "/dashboard" | "/dashboard/";
+  to: "/" | "/dashboard/analytics" | "/dashboard/api-keys" | "/dashboard";
+  id:
+    | "__root__"
+    | "/"
+    | "/dashboard"
+    | "/dashboard/analytics"
+    | "/dashboard/api-keys"
+    | "/dashboard/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -80,14 +109,32 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/dashboard/api-keys": {
+      id: "/dashboard/api-keys";
+      path: "/api-keys";
+      fullPath: "/dashboard/api-keys";
+      preLoaderRoute: typeof DashboardApiKeysRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/analytics": {
+      id: "/dashboard/analytics";
+      path: "/analytics";
+      fullPath: "/dashboard/analytics";
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
   }
 }
 
 interface DashboardRouteRouteChildren {
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute;
+  DashboardApiKeysRoute: typeof DashboardApiKeysRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardApiKeysRoute: DashboardApiKeysRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 };
 

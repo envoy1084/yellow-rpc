@@ -1,3 +1,4 @@
+import { SignOutIcon } from "@phosphor-icons/react";
 import {
   useConnection,
   useConnectors,
@@ -42,11 +43,16 @@ export const ConnectButton = () => {
         <>
           <Avatar className="size-6">
             <AvatarImage src={ensAvatar ?? undefined} />
-            <AvatarFallback className="border text-xs">
-              {ensName?.slice(0, 2).toUpperCase() ?? address.slice(2, 4)}
+            <AvatarFallback className="border-none">
+              <img
+                alt="avatar"
+                className="size-6 rounded-full"
+                src="https://api.dicebear.com/9.x/glass/svg?seed=Sawyer"
+              />
             </AvatarFallback>
           </Avatar>
           <span>{ensName ?? truncateAddress(address)}</span>
+          <SignOutIcon />
         </>
       ) : (
         <>Connect Wallet</>

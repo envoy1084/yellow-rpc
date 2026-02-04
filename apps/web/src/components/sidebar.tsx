@@ -22,20 +22,20 @@ const sidebarItems = [
     tooltip: "Dashboard",
   },
   {
-    href: "/api-keys",
+    href: "/dashboard/api-keys",
     icon: KeyIcon,
     key: "api-keys",
     label: "API Keys",
     tooltip: "API Keys",
   },
   {
-    href: "/analytics",
+    href: "/dashboard/analytics",
     icon: ChartBarIcon,
     key: "analytics",
     label: "Analytics",
     tooltip: "Analytics",
   },
-];
+] as const;
 
 export const AppSidebar = () => {
   return (
@@ -53,7 +53,7 @@ export const AppSidebar = () => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu>
+          <SidebarMenu className="flex flex-col gap-1">
             {sidebarItems.map((item) => {
               return (
                 <SidebarMenuItem key={item.key}>
@@ -61,7 +61,7 @@ export const AppSidebar = () => {
                     render={
                       <Link
                         activeOptions={{
-                          exact: false,
+                          exact: true,
                         }}
                         activeProps={{
                           className:
