@@ -212,9 +212,6 @@ importers:
       '@yellow-rpc/config':
         specifier: workspace:*
         version: link:../config
-      tsdown:
-        specifier: 0.20.1
-        version: 0.20.1(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -270,9 +267,6 @@ importers:
       '@yellow-rpc/config':
         specifier: workspace:*
         version: link:../config
-      tsdown:
-        specifier: ^0.20.1
-        version: 0.20.1(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -291,9 +285,6 @@ importers:
       '@yellow-rpc/config':
         specifier: workspace:*
         version: link:../config
-      tsdown:
-        specifier: ^0.20.1
-        version: 0.20.1(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -343,9 +334,6 @@ importers:
       '@yellow-rpc/config':
         specifier: workspace:*
         version: link:../config
-      tsdown:
-        specifier: ^0.20.1
-        version: 0.20.1(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -368,9 +356,6 @@ importers:
       '@yellow-rpc/config':
         specifier: workspace:*
         version: link:../config
-      tsdown:
-        specifier: ^0.20.1
-        version: 0.20.1(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
