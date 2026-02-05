@@ -1,4 +1,5 @@
 import { HttpApiDecodeError } from "@effect/platform/HttpApiError";
+import { RedisCore } from "@envoy1084/effect-redis";
 import { RPCProtocolVersion } from "@erc7824/nitrolite";
 import type { ActivateApiKeyRequest } from "@yellow-rpc/api";
 import { ApiKeyRepository } from "@yellow-rpc/domain/apiKey";
@@ -82,6 +83,9 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     const apiKey = `yellow_rpc_${createRandomStringGenerator("a-z", "A-Z", "0-9")(10)}`;
     const hashed = keyHasher(apiKey);
 
+    const redis = yield* RedisCore;
+    // Create a Reverse Lookup hashed=>apiKeyId
+    yield* redis.set(`api_key_reverse:${hashed}`, data.apiKeyId);
     yield* apiKeyRepo.updateApiKey(data.apiKeyId, data.walletAddress, {
       appSessionId,
       key: hashed,

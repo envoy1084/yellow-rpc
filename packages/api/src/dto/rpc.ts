@@ -14,17 +14,22 @@ export const JsonRpcResponse = Schema.Struct({
   result: Schema.optional(Schema.Unknown),
 });
 
-export const Unauthorized = Schema.Struct({
-  error: Schema.Literal("Unauthorized"),
-  message: Schema.String,
-});
+export class InvalidApiKey extends Schema.TaggedError<InvalidApiKey>()(
+  "InvalidApiKey",
+  {},
+) {}
 
-export const PaymentRequired = Schema.Struct({
-  error: Schema.Literal("PaymentRequired"),
-  message: Schema.String,
-});
+export class Unauthorized extends Schema.TaggedError<Unauthorized>()(
+  "Unauthorized",
+  {},
+) {}
 
-export const RpcError = Schema.Struct({
-  error: Schema.Literal("RpcError"),
-  message: Schema.String,
-});
+export class PaymentRequired extends Schema.TaggedError<PaymentRequired>()(
+  "PaymentRequired",
+  {},
+) {}
+
+export class RpcError extends Schema.TaggedError<RpcError>()("RpcError", {}) {}
+
+export type JsonRpcRequest = typeof JsonRpcRequest.Type;
+export type JsonRpcResponse = typeof JsonRpcResponse.Type;

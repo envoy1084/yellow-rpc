@@ -5,10 +5,7 @@ import { Context, Effect, Layer, type Option, Schema } from "effect";
 export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
   ApiKeyRepository,
   {
-    getApiKey: (
-      walletAddress: string,
-      id: string,
-    ) => Effect.Effect<Option.Option<ApiKey>, RedisError>;
+    getApiKey: (id: string) => Effect.Effect<Option.Option<ApiKey>, RedisError>;
     createApiKey: (
       walletAddress: string,
       data: ApiKey,
@@ -23,6 +20,7 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
       walletAddress: string,
     ) => Effect.Effect<void, RedisError>;
     listApiKeys: (walletAddress: string) => Effect.Effect<ApiKey[], RedisError>;
+    // getApiKeyByHash: () => Effect.Effect<ApiKey[], RedisError>;
   }
 >() {}
 
@@ -35,7 +33,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
     return ApiKeyRepository.of({
       createApiKey: (walletAddress, data) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${walletAddress}:${data.id}`;
+          const key = `${suffix}:${data.id}`;
           const arrKey = `user:${walletAddress}:api_keys`;
           yield* redis.sAdd(arrKey, data.id);
           const encoded = Schema.encodeSync(ApiKeySchema)(data);
@@ -43,14 +41,14 @@ export const ApiKeyRepositoryLive = Layer.effect(
         }),
       deleteApiKey: (id, walletAddress) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${walletAddress}:${id}`;
+          const key = `${suffix}:${id}`;
           const arrKey = `user:${walletAddress}:api_keys`;
           yield* redis.sRem(arrKey, id);
           yield* redis.del(key);
         }),
-      getApiKey: (id, walletAddress) =>
+      getApiKey: (id) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${walletAddress}:${id}`;
+          const key = `${suffix}:${id}`;
           const res = yield* redis.hGetAll(key);
           return Schema.decodeUnknownOption(ApiKeySchema)(res);
         }),
@@ -76,7 +74,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
         }),
       updateApiKey: (id, walletAddress, changes) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${walletAddress}:${id}`;
+          const key = `${suffix}:${id}`;
           const keyExists = yield* redis.exists(key);
           if (keyExists === 0) return;
 
