@@ -136,3 +136,5 @@ closeMessageJson.sig.push(sig2);
 
 await clientUser.sendMessage(JSON.stringify(closeMessageJson));
 console.log("Closed App Session");
+
+await clientUser.disconnect();

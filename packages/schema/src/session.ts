@@ -3,8 +3,8 @@ import { Schema } from "effect";
 export const AppSessionSchema = Schema.Struct({
   // Admin Balance
   adminBalance: Schema.Number,
-  // Asset Address
-  assetAddress: Schema.String,
+  // Asset
+  asset: Schema.String,
   // Timestamps
   createdAt: Schema.DateFromString,
   // App Session Id

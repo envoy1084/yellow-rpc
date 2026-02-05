@@ -14,14 +14,15 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
       data: ApiKey,
     ) => Effect.Effect<void, RedisError>;
     updateApiKey: (
-      walletAddress: string,
       id: string,
+      walletAddress: string,
       changes: Partial<ApiKey>,
     ) => Effect.Effect<void, RedisError>;
     deleteApiKey: (
       id: string,
       walletAddress: string,
     ) => Effect.Effect<void, RedisError>;
+    listApiKeys: (walletAddress: string) => Effect.Effect<ApiKey[], RedisError>;
   }
 >() {}
 
@@ -52,6 +53,26 @@ export const ApiKeyRepositoryLive = Layer.effect(
           const key = `${suffix}:${walletAddress}:${id}`;
           const res = yield* redis.hGetAll(key);
           return Schema.decodeUnknownOption(ApiKeySchema)(res);
+        }),
+      listApiKeys: (walletAddress) =>
+        Effect.gen(function* () {
+          const arrKey = `user:${walletAddress}:api_keys`;
+          const ids = yield* redis.sMembers(arrKey);
+
+          if (ids.length === 0) return [];
+
+          const [_, res] = yield* redis.pipeline((tx) =>
+            Effect.gen(function* () {
+              for (const id of ids) {
+                yield* tx.hGetAll(`api_key:${id}`);
+              }
+            }),
+          );
+
+          const keys = res.map((k) =>
+            Schema.decodeUnknownSync(ApiKeySchema)(k),
+          );
+          return keys;
         }),
       updateApiKey: (id, walletAddress, changes) =>
         Effect.gen(function* () {

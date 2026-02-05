@@ -1,16 +1,13 @@
-import { HttpApiBuilder } from "@effect/platform";
 import { HttpApiDecodeError } from "@effect/platform/HttpApiError";
-import {
-  type AuthRequestParams,
-  createAuthRequestMessage,
-} from "@erc7824/nitrolite";
-import { api, type PrepareApiKeyRequest } from "@yellow-rpc/api";
+import { createAuthRequestMessage } from "@erc7824/nitrolite";
+import type { PrepareApiKeyRequest } from "@yellow-rpc/api";
 import { ApiKeyRepository } from "@yellow-rpc/domain/apiKey";
+import { encryptAesGcm } from "@yellow-rpc/domain/helpers";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
-import { Effect } from "effect";
+import { Config, Effect } from "effect";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
+export const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
   Effect.gen(function* () {
     // Step 1: Create new API Key with pending status
     const apiKeyRepo = yield* ApiKeyRepository;
@@ -35,17 +32,22 @@ const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
 
     const sessionPrivateKey = generatePrivateKey();
     const sessionPublicKey = privateKeyToAccount(sessionPrivateKey).address;
+    const masterKey = yield* Config.string("MASTER_KEY");
+    const encSessionPrivateKey = encryptAesGcm({
+      masterKey,
+      text: sessionPrivateKey,
+    });
     yield* appSessionRepo.createAppSession(apiKeyId, {
       adminBalance: 0,
-      assetAddress: "", // This will be populated once api key is activated
+      asset: "ytest.usd",
       createdAt: new Date(),
       id: "", // This will be populated once api key is activated
       pendingSettlement: 0,
-      sessionPrivateKey,
+      sessionPrivateKey: encSessionPrivateKey,
       sessionPublicKey,
       status: "inactive",
       updatedAt: new Date(),
-      userBalance: 0,
+      userBalance: data.initialBalance,
     });
 
     const authMessage = yield* Effect.promise(() =>
@@ -66,7 +68,7 @@ const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
       authMessage,
     };
   }).pipe(
-    Effect.catchTag("RedisError", (e) =>
+    Effect.catchAll((e) =>
       Effect.fail(
         new HttpApiDecodeError({
           issues: [],
@@ -75,11 +77,3 @@ const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
       ),
     ),
   );
-
-export const ApiKeyLive = HttpApiBuilder.group(api, "apiKey", (handlers) =>
-  handlers.handle("prepareApiKey", ({ payload }) =>
-    prepareApiKeyHandler(payload),
-  ),
-);
-
-export const ApiKeyTest = ApiKeyLive;

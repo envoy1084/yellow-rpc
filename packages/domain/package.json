@@ -23,6 +23,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./apiKey": "./src/api-key/index.ts",
+    "./helpers": "./src/helpers/index.ts",
     "./session": "./src/session/index.ts"
   },
   "homepage": "https://github.com/envoy1084/yellow-rpc#readme",
