@@ -10,6 +10,7 @@
     "@erc7824/nitrolite": "^0.5.3",
     "@yellow-rpc/api": "workspace:*",
     "@yellow-rpc/domain": "workspace:*",
+    "@yellow-rpc/rpc": "workspace:*",
     "dotenv": "^17.2.3",
     "effect": "^3.19.15",
     "viem": "^2.45.1"

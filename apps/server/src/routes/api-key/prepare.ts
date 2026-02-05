@@ -4,8 +4,10 @@ import type { PrepareApiKeyRequest } from "@yellow-rpc/api";
 import { ApiKeyRepository } from "@yellow-rpc/domain/apiKey";
 import { encryptAesGcm } from "@yellow-rpc/domain/helpers";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
-import { Config, Effect } from "effect";
+import { Effect, Redacted } from "effect";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+import { Env } from "@/env";
 
 export const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
   Effect.gen(function* () {
@@ -32,9 +34,9 @@ export const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
 
     const sessionPrivateKey = generatePrivateKey();
     const sessionPublicKey = privateKeyToAccount(sessionPrivateKey).address;
-    const masterKey = yield* Config.string("MASTER_KEY");
+    const env = yield* Env;
     const encSessionPrivateKey = encryptAesGcm({
-      masterKey,
+      masterKey: Redacted.value(env.masterKey),
       text: sessionPrivateKey,
     });
     yield* appSessionRepo.createAppSession(apiKeyId, {

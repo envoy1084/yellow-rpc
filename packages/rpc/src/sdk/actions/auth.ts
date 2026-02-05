@@ -11,7 +11,7 @@ import {
 import type { WalletClient } from "viem";
 import type { Client } from "yellow-ts";
 
-import { generateSessionKey } from "../helpers";
+import { generateSession, type Session } from "../helpers";
 export type AuthenticateProps = {
   application: string;
   allowances: RPCAllowance[];
@@ -22,14 +22,14 @@ export const authenticate = (
   walletClient: WalletClient,
   props: AuthenticateProps,
   client: Client,
-) => {
+): Promise<Session> => {
   return new Promise(async (resolve, reject) => {
     let removeListener: (() => void) | undefined;
 
     try {
       if (!walletClient.account) throw new Error("Wallet not connected");
 
-      const sessionKey = generateSessionKey();
+      const session = generateSession();
       const sessionExpireTimestamp = Math.floor(
         props.expiresAt.getTime() / 1000,
       );
@@ -38,7 +38,7 @@ export const authenticate = (
         allowances: props.allowances,
         expires_at: BigInt(sessionExpireTimestamp),
         scope: props.scope,
-        session_key: sessionKey.address,
+        session_key: session.address,
       };
 
       const authListener = async (message: RPCResponse) => {
@@ -61,10 +61,7 @@ export const authenticate = (
           if (message.method === RPCMethod.AuthVerify) {
             if (removeListener) removeListener();
 
-            resolve({
-              session: message.params,
-              sessionKey,
-            });
+            resolve(session);
           }
 
           if (message.method === RPCMethod.Error) {

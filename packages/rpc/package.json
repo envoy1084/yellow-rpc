@@ -29,7 +29,7 @@
   "homepage": "https://github.com/envoy1084/yellow-rpc#readme",
   "keywords": [],
   "license": "MIT",
-  "name": "@yellow-rpc/channel",
+  "name": "@yellow-rpc/rpc",
   "repository": {
     "type": "git",
     "url": "https://github.com/envoy1084/yellow-rpc"

@@ -50,6 +50,9 @@ importers:
       '@yellow-rpc/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@yellow-rpc/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
