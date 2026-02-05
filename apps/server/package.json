@@ -11,6 +11,7 @@
     "@yellow-rpc/api": "workspace:*",
     "@yellow-rpc/domain": "workspace:*",
     "@yellow-rpc/rpc": "workspace:*",
+    "@yellow-rpc/schema": "workspace:*",
     "dotenv": "^17.2.3",
     "effect": "^3.19.15",
     "viem": "^2.45.1"

@@ -1,7 +1,7 @@
 import { layerWithOptions, RedisCoreLive } from "@envoy1084/effect-redis";
 import { Effect, Layer, Redacted } from "effect";
 
-import { Env, EnvLive, EnvTest } from "./env";
+import { Env, EnvLive } from "./env";
 import { HttpLive } from "./router";
 
 const RedisLayer = RedisCoreLive.pipe(
@@ -9,7 +9,6 @@ const RedisLayer = RedisCoreLive.pipe(
     Layer.unwrapEffect(
       Effect.gen(function* () {
         const config = yield* Env;
-
         return layerWithOptions({
           url: Redacted.value(config.redisUrl),
         });
@@ -21,8 +20,4 @@ const RedisLayer = RedisCoreLive.pipe(
 export const YellowRpcLive = HttpLive.pipe(
   Layer.provideMerge(RedisLayer),
   Layer.provideMerge(EnvLive),
-);
-export const YellowRpcTest = HttpLive.pipe(
-  Layer.provideMerge(RedisLayer),
-  Layer.provideMerge(EnvTest),
 );

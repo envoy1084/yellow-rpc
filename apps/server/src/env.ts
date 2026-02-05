@@ -4,14 +4,16 @@ type EnvValues = {
   readonly redisUrl: Redacted.Redacted<string>;
   readonly masterKey: Redacted.Redacted<string>;
   readonly adminPrivateKey: Redacted.Redacted<string>;
-  readonly clearNodeRpcUrl: string;
+  readonly alchemyApiToken: Redacted.Redacted<string>;
+  readonly clearNodeWsUrl: string;
   readonly adminAddress: string;
 };
 
 const envConfig: Config.Config<EnvValues> = Config.all({
   adminAddress: Config.string("ADMIN_ADDRESS"),
   adminPrivateKey: Config.redacted("ADMIN_PRIVATE_KEY"),
-  clearNodeRpcUrl: Config.string("CLEARNODE_RPC_URL"),
+  alchemyApiToken: Config.redacted("ALCHEMY_API_TOKEN"),
+  clearNodeWsUrl: Config.string("CLEARNODE_WS_URL"),
   masterKey: Config.redacted("MASTER_KEY"),
   redisUrl: Config.redacted("REDIS_URL"),
 });

@@ -53,6 +53,9 @@ importers:
       '@yellow-rpc/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
+      '@yellow-rpc/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3

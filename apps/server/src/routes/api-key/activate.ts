@@ -41,7 +41,7 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     // Step 2: Create a new App Session (admin)
     const res = yield* Effect.promise(async () => {
       const sdk = new YellowClient({
-        url: env.clearNodeRpcUrl,
+        url: env.clearNodeWsUrl,
       });
 
       await sdk.connect();

@@ -1,6 +1,7 @@
 import { Context, Effect, Layer, Redacted } from "effect";
 import { createWalletClient, type Hex, http, type WalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
 
 import { Env } from "@/env";
 
@@ -22,6 +23,7 @@ export const AdminLive = Layer.effect(
 
     const walletClient = createWalletClient({
       account,
+      chain: mainnet,
       transport: http(),
     });
 
