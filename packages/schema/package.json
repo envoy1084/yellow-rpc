@@ -16,16 +16,8 @@
     "vitest": "^4.0.18"
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
-    }
+    ".": "./src/index.ts"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "homepage": "https://github.com/envoy1084/yellow-rpc#readme",
   "keywords": [],
   "license": "MIT",
@@ -35,7 +27,6 @@
     "url": "https://github.com/envoy1084/yellow-rpc"
   },
   "scripts": {
-    "build": "tsdown",
     "dev": "vitest",
     "test": "vitest run"
   },

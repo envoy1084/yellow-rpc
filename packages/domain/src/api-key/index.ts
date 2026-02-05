@@ -1,9 +1,5 @@
 import { RedisCore, type RedisError } from "@envoy1084/effect-redis";
-import {
-  type ApiKey,
-  ApiKeySchema,
-  type CreateApiKeyRequest,
-} from "@yellow-rpc/schema";
+import { type ApiKey, ApiKeySchema } from "@yellow-rpc/schema";
 import { Context, Effect, Layer, type Option, Schema } from "effect";
 
 export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
@@ -15,7 +11,7 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
     ) => Effect.Effect<Option.Option<ApiKey>, RedisError>;
     createApiKey: (
       walletAddress: string,
-      data: CreateApiKeyRequest,
+      data: ApiKey,
     ) => Effect.Effect<void, RedisError>;
     updateApiKey: (
       walletAddress: string,
@@ -38,21 +34,10 @@ export const ApiKeyRepositoryLive = Layer.effect(
     return ApiKeyRepository.of({
       createApiKey: (walletAddress, data) =>
         Effect.gen(function* () {
-          const apiKey: ApiKey = {
-            ...data,
-            appSessionId: undefined,
-            createdAt: new Date(),
-            id: "", // TODO: Generate a unique id
-            key: "", // TODO: Generate a unique key
-            ownerAddress: walletAddress,
-            start: "", // TODO: Generate a unique start
-            status: "inactive",
-            updatedAt: new Date(),
-          };
-          const key = `${suffix}:${walletAddress}:${apiKey.id}`;
+          const key = `${suffix}:${walletAddress}:${data.id}`;
           const arrKey = `user:${walletAddress}:api_keys`;
-          yield* redis.sAdd(arrKey, apiKey.id);
-          const encoded = Schema.encodeSync(ApiKeySchema)(apiKey);
+          yield* redis.sAdd(arrKey, data.id);
+          const encoded = Schema.encodeSync(ApiKeySchema)(data);
           yield* redis.hSet(key, encoded);
         }),
       deleteApiKey: (id, walletAddress) =>
@@ -65,7 +50,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
       getApiKey: (id, walletAddress) =>
         Effect.gen(function* () {
           const key = `${suffix}:${walletAddress}:${id}`;
-          const res = yield* redis.json.get(key);
+          const res = yield* redis.hGetAll(key);
           return Schema.decodeUnknownOption(ApiKeySchema)(res);
         }),
       updateApiKey: (id, walletAddress, changes) =>

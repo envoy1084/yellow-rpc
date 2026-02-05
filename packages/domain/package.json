@@ -7,6 +7,7 @@
     "@effect/platform": "^0.94.2",
     "@envoy1084/effect-redis": "^0.0.2",
     "@yellow-rpc/schema": "workspace:*",
+    "base64url": "^3.0.1",
     "effect": "^3.19.15",
     "lodash.merge": "^4.6.2"
   },
@@ -29,9 +30,9 @@
       "import": "./dist/apiKey.mjs",
       "types": "./dist/apiKey.d.mts"
     },
-    "./user": {
-      "import": "./dist/user.mjs",
-      "types": "./dist/user.d.mts"
+    "./session": {
+      "import": "./dist/session.mjs",
+      "types": "./dist/session.d.mts"
     }
   },
   "files": [

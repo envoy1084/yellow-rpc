@@ -7,9 +7,12 @@
     "@effect/platform": "^0.94.2",
     "@effect/platform-node": "^0.104.1",
     "@envoy1084/effect-redis": "^0.0.2",
+    "@erc7824/nitrolite": "^0.5.3",
     "@yellow-rpc/api": "workspace:*",
+    "@yellow-rpc/domain": "workspace:*",
     "dotenv": "^17.2.3",
-    "effect": "^3.19.15"
+    "effect": "^3.19.15",
+    "viem": "^2.45.1"
   },
   "description": "",
   "devDependencies": {

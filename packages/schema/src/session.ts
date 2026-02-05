@@ -5,16 +5,19 @@ export const AppSessionSchema = Schema.Struct({
   adminBalance: Schema.Number,
   // Asset Address
   assetAddress: Schema.String,
+  // Timestamps
+  createdAt: Schema.DateFromString,
   // App Session Id
   id: Schema.String,
   // Pending Settlements
-  pendingSettlements: Schema.Number,
+  pendingSettlement: Schema.Number,
   // Hashed Session Private Key
   sessionPrivateKey: Schema.String,
   // Session Public Key
   sessionPublicKey: Schema.String,
   // status
-  status: Schema.Literal("open", "closed", "challenged"),
+  status: Schema.Literal("open", "closed", "challenged", "inactive"),
+  updatedAt: Schema.DateFromString,
   // User Balance
   userBalance: Schema.Number,
 });

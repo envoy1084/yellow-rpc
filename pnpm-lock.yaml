@@ -41,15 +41,24 @@ importers:
       '@envoy1084/effect-redis':
         specifier: ^0.0.2
         version: 0.0.2
+      '@erc7824/nitrolite':
+        specifier: ^0.5.3
+        version: 0.5.3(typescript@5.9.3)
       '@yellow-rpc/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@yellow-rpc/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
       effect:
         specifier: ^3.19.15
         version: 3.19.15
+      viem:
+        specifier: ^2.45.1
+        version: 2.45.1(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@effect/vitest':
         specifier: ^0.27.0
@@ -239,6 +248,9 @@ importers:
       '@yellow-rpc/schema':
         specifier: workspace:*
         version: link:../schema
+      base64url:
+        specifier: ^3.0.1
+        version: 3.0.1
       effect:
         specifier: ^3.19.15
         version: 3.19.15
@@ -1926,6 +1938,10 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  base64url@3.0.1:
+    resolution: {integrity: sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==}
+    engines: {node: '>=6.0.0'}
 
   baseline-browser-mapping@2.9.19:
     resolution: {integrity: sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==}
@@ -5705,6 +5721,8 @@ snapshots:
       - supports-color
 
   base64-js@1.5.1: {}
+
+  base64url@3.0.1: {}
 
   baseline-browser-mapping@2.9.19: {}
 
