@@ -2,6 +2,7 @@ import {
   createAppSessionMessage,
   createCloseAppSessionMessage,
   createSubmitAppStateMessage,
+  type GetAppSessionsResponse,
   type RPCAppDefinition,
   type RPCAppSessionAllocation,
   RPCAppStateIntent,
