@@ -21,7 +21,6 @@ import type { Address, Hex } from "viem";
 
 import { Env } from "@/env";
 
-import { adminWalletClient } from "../../../../packages/rpc/temp/wallet";
 import { Admin } from "./admin";
 
 export class Settlement extends Context.Tag("Settlement")<
@@ -64,14 +63,15 @@ export const SettlementLive = Layer.scoped(
         const session = await sdk.authenticate(admin.walletClient, {
           allowances: [],
           application: crypto.randomUUID(),
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 365 days
-          scope: "yellow-rpc",
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 1 year
+          scope: "yellow-rpc.com",
         });
 
         return { sdk, session };
       }),
       ({ sdk }) => Effect.promise(async () => sdk.disconnect()),
-    );
+    ).pipe(Effect.scoped);
+    yield* Effect.log("Authenticated with Admin", session.address);
 
     const worker = Effect.gen(function* () {
       while (true) {
@@ -98,7 +98,7 @@ export const SettlementLive = Layer.scoped(
               {
                 amount: String(appSession.adminBalance),
                 asset: appSession.asset,
-                participant: adminWalletClient.account.address,
+                participant: admin.walletClient.account?.address as Address,
               },
               {
                 amount: String(appSession.userBalance),

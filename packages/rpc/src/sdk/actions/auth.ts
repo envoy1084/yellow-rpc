@@ -18,6 +18,7 @@ export type AuthenticateProps = {
   expiresAt: Date;
   scope: string;
 };
+
 export const authenticate = (
   walletClient: WalletClient,
   props: AuthenticateProps,
@@ -34,20 +35,18 @@ export const authenticate = (
         props.expiresAt.getTime() / 1000,
       );
 
-      const authProps = {
-        allowances: props.allowances,
-        expires_at: BigInt(sessionExpireTimestamp),
-        scope: props.scope,
-        session_key: session.address,
-      };
-
       const authListener = async (message: RPCResponse) => {
         try {
           if (message.method === RPCMethod.AuthChallenge) {
             const eip712Signer = createEIP712AuthMessageSigner(
               walletClient,
-              authProps,
-              { name: "Name" },
+              {
+                allowances: props.allowances,
+                expires_at: BigInt(sessionExpireTimestamp),
+                scope: props.scope,
+                session_key: session.address,
+              },
+              { name: props.application },
             );
 
             const authVerifyMessage = await createAuthVerifyMessage(
@@ -78,9 +77,12 @@ export const authenticate = (
       removeListener = client.listen(authListener);
 
       const authMessage = await createAuthRequestMessage({
-        ...authProps,
         address: walletClient.account.address,
+        allowances: props.allowances,
         application: props.application,
+        expires_at: BigInt(sessionExpireTimestamp),
+        scope: props.scope,
+        session_key: session.address,
       });
 
       await client.sendMessage(authMessage);

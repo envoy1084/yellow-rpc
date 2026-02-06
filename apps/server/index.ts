@@ -1,9 +1,16 @@
+/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: safe */
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
 const client = createPublicClient({
   chain: mainnet,
-  transport: http("http://localhost:8080/rpc"),
+  transport: http("http://localhost:8080/rpc", {
+    fetchOptions: {
+      headers: {
+        "x-api-key": process.env.API_KEY as string,
+      },
+    },
+  }),
 });
 
 const res = await client.getBalance({
