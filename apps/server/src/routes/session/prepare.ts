@@ -1,12 +1,56 @@
 import type { PrepareCreateAppSessionRequest } from "@yellow-rpc/api";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
-import { Effect } from "effect";
+import { generateSession } from "@yellow-rpc/rpc";
+import { AddressSchema, HexSchema } from "@yellow-rpc/schema";
+import { Duration, Effect } from "effect";
+
+import { Encryption } from "@/layers";
 
 export const prepareAppSessionHandler = (
   data: PrepareCreateAppSessionRequest,
 ) =>
   Effect.gen(function* () {
+    const encryption = yield* Encryption;
     const appSessionRepo = yield* AppSessionRepository;
 
-    // TODO: Generate Session Key Pairs
+    const userSession = generateSession();
+    const encUserSessionPrivateKey = yield* encryption.encrypt(
+      userSession.privateKey,
+    );
+
+    const id = crypto.randomUUID();
+    appSessionRepo.createAppSession(data.walletAddress, {
+      adminBalance: 0,
+      adminEncSessionPrivateKey: "", // TODO: Generate Encrypted Session Private Key
+      adminSessionKey: AddressSchema.make("0x0"), // TODO: Generate Session Key
+      appSessionId: HexSchema.make("0x0"), // Will be populated after creation
+      asset: "ytest.usd",
+      createdAt: new Date(),
+      encAdminJwt: "test",
+      expiresAt: new Date(),
+      id,
+      ownerAddress: AddressSchema.make(data.walletAddress),
+      pendingSettlement: 0,
+      status: "inactive",
+      updatedAt: new Date(),
+      userBalance: 0,
+      userEncSessionPrivateKey: encUserSessionPrivateKey,
+      userSessionKey: AddressSchema.make(userSession.address),
+      version: 0,
+    });
+
+    // Make a Auth Message
+    const authParams = JSON.stringify({
+      address: data.walletAddress as `0x${string}`,
+      allowances: [],
+      application: "YellowRPC",
+      expires_at: new Date(Date.now() + Duration.toMillis(Duration.days(356))),
+      scope: "yellow-rpc.com",
+      session_key: userSession.address,
+    });
+
+    return {
+      authParams,
+      id,
+    };
   });

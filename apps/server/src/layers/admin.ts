@@ -2,7 +2,7 @@ import type { Session } from "@yellow-rpc/rpc";
 import { YellowClient } from "@yellow-rpc/rpc";
 import { Context, Duration, Effect, Layer, Redacted } from "effect";
 import { createWalletClient, type Hex, http, type WalletClient } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { type Address, privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 
 import { Env } from "@/env";
@@ -13,6 +13,7 @@ export class Admin extends Context.Tag("Admin")<
     walletClient: WalletClient;
     client: YellowClient;
     session: Session;
+    address: Address;
   }
 >() {}
 
@@ -35,7 +36,7 @@ export const AdminLive = Layer.scoped(
         url: env.clearNodeWsUrl,
       });
 
-      Duration.days(356);
+      const address = account.address;
 
       // Start Authentication
       const session = yield* Effect.promise(async () => {
@@ -52,7 +53,7 @@ export const AdminLive = Layer.scoped(
         return session;
       });
 
-      return { client, session, walletClient };
+      return { address, client, session, walletClient };
     }),
     ({ client }) => Effect.promise(() => client.disconnect()),
   ),
