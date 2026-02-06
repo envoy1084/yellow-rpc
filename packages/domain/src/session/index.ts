@@ -6,14 +6,14 @@ export class AppSessionRepository extends Context.Tag("AppSessionRepository")<
   AppSessionRepository,
   {
     getAppSession: (
-      apiKeyId: string,
+      walletAddress: string,
     ) => Effect.Effect<Option.Option<AppSession>, RedisError>;
     createAppSession: (
-      apiKeyId: string,
+      walletAddress: string,
       data: AppSession,
     ) => Effect.Effect<void, RedisError>;
     updateAppSession: (
-      apiKeyId: string,
+      walletAddress: string,
       changes: Partial<AppSession>,
     ) => Effect.Effect<void, RedisError>;
   }
@@ -26,24 +26,24 @@ export const AppSessionRepositoryLive = Layer.effect(
     const suffix = "app_session";
 
     return AppSessionRepository.of({
-      createAppSession: (apiKeyId, data) =>
+      createAppSession: (walletAddress, data) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${apiKeyId}`;
+          const key = `${suffix}:${walletAddress}`;
           const encoded = Schema.encodeSync(AppSessionSchema)(data);
           yield* redis.hSet(key, encoded);
         }),
-      getAppSession: (apiKeyId) =>
+      getAppSession: (walletAddress) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${apiKeyId}`;
+          const key = `${suffix}:${walletAddress}`;
           const res = yield* redis.hGetAll(key);
           yield* Effect.log("Get App Session Redis Result", res);
           const r = Schema.decodeUnknownSync(AppSessionSchema)(res);
           yield* Effect.log("Decoded", r);
           return Option.some(r);
         }),
-      updateAppSession: (apiKeyId, changes) =>
+      updateAppSession: (walletAddress, changes) =>
         Effect.gen(function* () {
-          const key = `${suffix}:${apiKeyId}`;
+          const key = `${suffix}:${walletAddress}`;
           const keyExists = yield* redis.exists(key);
           if (keyExists === 0) return;
 

@@ -18,3 +18,13 @@ export const ActivateAppSessionRequestSchema = Schema.Struct({
 export const ActivateAppSessionResponseSchema = Schema.Struct({
   appSessionId: Schema.String,
 });
+
+export type PrepareCreateAppSessionRequest =
+  typeof PrepareCreateAppSessionSchema.Type;
+export type PrepareCreateAppSessionResponse =
+  typeof PrepareCreateAppSessionResponseSchema.Type;
+
+export type ActivateAppSessionRequest =
+  typeof ActivateAppSessionRequestSchema.Type;
+export type ActivateAppSessionResponse =
+  typeof ActivateAppSessionResponseSchema.Type;
