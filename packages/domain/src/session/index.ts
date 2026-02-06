@@ -48,7 +48,7 @@ export const AppSessionRepositoryLive = Layer.effect(
           const encodedChanges = Object.fromEntries(
             Object.entries({
               ...changes,
-              createdAt: changes.updatedAt?.toISOString(),
+              createdAt: changes.createdAt?.toISOString(),
               updatedAt: new Date().toISOString(),
             }).filter(([_, v]) => v !== undefined),
           ) as Record<string, string>;

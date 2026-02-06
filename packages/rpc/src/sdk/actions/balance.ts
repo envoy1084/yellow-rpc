@@ -1,5 +1,6 @@
 import {
   createGetLedgerBalancesMessage,
+  type ErrorResponse,
   type GetLedgerBalancesResponse,
   type MessageSigner,
 } from "@erc7824/nitrolite";
@@ -13,5 +14,7 @@ export const getLedgerBalance = async (
 ) => {
   const msg = await createGetLedgerBalancesMessage(signer, accountOrSessionId);
 
-  return (await client.sendMessage(msg)) as GetLedgerBalancesResponse;
+  return (await client.sendMessage(msg)) as
+    | GetLedgerBalancesResponse
+    | ErrorResponse;
 };

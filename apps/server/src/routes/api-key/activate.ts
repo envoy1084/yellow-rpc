@@ -1,16 +1,21 @@
 import { HttpApiDecodeError } from "@effect/platform/HttpApiError";
 import { RedisCore } from "@envoy1084/effect-redis";
-import { RPCProtocolVersion } from "@erc7824/nitrolite";
+import {
+  createECDSAMessageSigner,
+  RPCMethod,
+  RPCProtocolVersion,
+} from "@erc7824/nitrolite";
 import type { ActivateApiKeyRequest } from "@yellow-rpc/api";
 import { ApiKeyRepository } from "@yellow-rpc/domain/apiKey";
 import {
   createRandomStringGenerator,
+  decryptAesGcm,
   keyHasher,
 } from "@yellow-rpc/domain/helpers";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import { YellowClient } from "@yellow-rpc/rpc";
-import { Data, Effect, Option } from "effect";
-import type { Address } from "viem";
+import { Data, Effect, Option, Redacted } from "effect";
+import type { Address, Hex } from "viem";
 
 import { Env } from "@/env";
 import { Admin } from "@/layers";
@@ -36,6 +41,13 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
       );
     }
 
+    const userSigner = createECDSAMessageSigner(
+      decryptAesGcm({
+        encrypted: appSession.value.sessionPrivateKey,
+        masterKey: Redacted.value(env.adminPrivateKey),
+      }) as Hex,
+    );
+
     // Step 1: Verify the signature
     // TODO: Implement this
 
@@ -50,10 +62,10 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
         allowances: [],
         application: `yellow-rpc-${data.apiKeyId}`,
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        scope: "yellow-rpc.",
+        scope: "yellow-rpc",
       });
 
-      const res = await sdk.createAppSession(session.signer, {
+      const res = await sdk.createAppSession(session.signer, [userSigner], {
         allocations: [
           {
             amount: appSession.value.userBalance.toString(),
@@ -75,9 +87,14 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
         },
       });
 
-      return res.params;
+      return res;
     });
-    const appSessionId = res.appSessionId;
+
+    if (res.method === RPCMethod.Error) {
+      return yield* Effect.fail(new Error(res.params.error));
+    }
+
+    const appSessionId = res.params.appSessionId;
 
     // Step 3: Create a new API Key, update status to active
     const apiKey = `yellow_rpc_${createRandomStringGenerator("a-z", "A-Z", "0-9")(10)}`;
@@ -86,7 +103,7 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     const redis = yield* RedisCore;
     // Create a Reverse Lookup hashed=>apiKeyId
     yield* redis.set(`api_key_reverse:${hashed}`, data.apiKeyId);
-    yield* apiKeyRepo.updateApiKey(data.apiKeyId, data.walletAddress, {
+    yield* apiKeyRepo.updateApiKey(data.apiKeyId, {
       appSessionId,
       key: hashed,
       start: apiKey.slice(0, 16),

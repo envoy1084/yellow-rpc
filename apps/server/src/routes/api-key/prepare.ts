@@ -50,6 +50,7 @@ export const prepareApiKeyHandler = (data: PrepareApiKeyRequest) =>
       status: "inactive",
       updatedAt: new Date(),
       userBalance: data.initialBalance,
+      version: 1,
     });
 
     const authMessage = yield* Effect.promise(() =>

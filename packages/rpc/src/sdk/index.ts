@@ -19,9 +19,15 @@ export class YellowClient extends Client {
 
   async createAppSession(
     signer: MessageSigner,
+    participantSigners: MessageSigner[],
     params: CreateAppSessionRequestParams,
   ) {
-    return await actions.createAppSession(signer, params, this);
+    return await actions.createAppSession(
+      signer,
+      participantSigners,
+      params,
+      this,
+    );
   }
 
   async submitAppState(

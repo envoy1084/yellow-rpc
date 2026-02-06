@@ -69,17 +69,22 @@ const initialAllocation = [
 
 // User Creates a channel
 const sessionMessage = await createAppSessionMessage(
-  session2.sessionKey.signer,
+  session1.sessionKey.signer,
   {
     allocations: initialAllocation,
     definition: appDefinition,
   },
 );
 
-console.log("Creating App Session...");
-const sessionResponse = await clientUser.sendMessage(sessionMessage);
-// const sessionId = sessionResponse.params.appSessionId;
-console.log("App Session Created");
+const sessionMessageJson = JSON.parse(sessionMessage);
+const sigCreate = await session2.sessionKey.signer(sessionMessageJson.req);
+sessionMessageJson.sig.push(sigCreate);
+
+console.log("Admin Creating App Session...");
+const sessionResponse = await clientAdmin.sendMessage(
+  JSON.stringify(sessionMessageJson),
+);
+console.log("App Session Created Id: ", sessionResponse.params);
 
 const newAllocation = [
   { amount: "0.75", asset, participant: userAddress },
@@ -87,7 +92,7 @@ const newAllocation = [
 ];
 
 const updateMessage = await createSubmitAppStateMessage(
-  session2.sessionKey.signer,
+  session1.sessionKey.signer,
   {
     allocations: newAllocation,
     app_session_id: sessionResponse.params.appSessionId,
@@ -97,22 +102,22 @@ const updateMessage = await createSubmitAppStateMessage(
 );
 
 const updateMessageJson = JSON.parse(updateMessage);
-console.log("Updating App Session...");
+console.log("Admin Updating App Session...");
 
 // Admin signs the update message
-const sigUpdate = await session1.sessionKey.signer(updateMessageJson.req);
+const sigUpdate = await session2.sessionKey.signer(updateMessageJson.req);
 
 const updateMessageSigned = {
   ...updateMessageJson,
-  sig: [sigUpdate, ...updateMessageJson.sig],
+  sig: [...updateMessageJson.sig, sigUpdate],
 };
 
-console.log("Update Message Signed");
+console.log("Update Message Signed by User: ", sigUpdate);
 
-await clientUser.sendMessage(JSON.stringify(updateMessageSigned));
-console.log("App Session Updated");
-
-await new Promise((resolve) => setTimeout(resolve, 5000));
+const resUpdate = await clientAdmin.sendMessage(
+  JSON.stringify(updateMessageSigned),
+);
+console.log("App Session Updated", resUpdate.params);
 
 const finalAllocation = [
   { amount: "0.5", asset, participant: userAddress },
@@ -120,7 +125,7 @@ const finalAllocation = [
 ] as RPCAppSessionAllocation[];
 
 const closeMessage = await createCloseAppSessionMessage(
-  session2.sessionKey.signer,
+  session1.sessionKey.signer,
   {
     allocations: finalAllocation,
     app_session_id: sessionResponse.params.appSessionId,
@@ -128,13 +133,13 @@ const closeMessage = await createCloseAppSessionMessage(
 );
 
 const closeMessageJson = JSON.parse(closeMessage);
-console.log("Closing App Session...");
+console.log("Admin Closing App Session...");
 
 // Admin signs the close message
-const sig2 = await session1.sessionKey.signer(closeMessageJson.req);
+const sig2 = await session2.sessionKey.signer(closeMessageJson.req);
 closeMessageJson.sig.push(sig2);
 
-await clientUser.sendMessage(JSON.stringify(closeMessageJson));
-console.log("Closed App Session");
+const res = await clientAdmin.sendMessage(JSON.stringify(closeMessageJson));
+console.log("Closed App Session", res.params);
 
 await clientUser.disconnect();

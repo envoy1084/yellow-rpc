@@ -7,6 +7,7 @@ import {
   createCloseAppSessionMessage,
   createGetAppDefinitionMessageV2,
   createSubmitAppStateMessage,
+  type ErrorResponse,
   type GetAppDefinitionResponse,
   type MessageSigner,
   type RPCData,
@@ -18,11 +19,20 @@ import type { Client } from "yellow-ts";
 
 export const createAppSession = async (
   signer: MessageSigner,
+  participantSigners: MessageSigner[],
   params: CreateAppSessionRequestParams,
   client: Client,
 ) => {
   const msg = await createAppSessionMessage(signer, params);
-  return (await client.sendMessage(msg)) as CreateAppSessionResponse;
+  const msgJson = JSON.parse(msg);
+  const participantSigs = await Promise.all(
+    participantSigners.map((s) => s(msgJson.req as RPCData)),
+  );
+
+  msgJson.sig.push(...participantSigs);
+  return (await client.sendMessage(msg)) as
+    | CreateAppSessionResponse
+    | ErrorResponse;
 };
 
 export const submitAppState = async (
@@ -41,9 +51,9 @@ export const submitAppState = async (
 
   msgJson.sig.push(...participantSigs);
 
-  return (await client.sendMessage(
-    JSON.stringify(msgJson),
-  )) as SubmitAppStateResponse;
+  return (await client.sendMessage(JSON.stringify(msgJson))) as
+    | SubmitAppStateResponse
+    | ErrorResponse;
 };
 
 export const closeAppSession = async (
@@ -62,13 +72,15 @@ export const closeAppSession = async (
 
   msgJson.sig.push(...participantSigs);
 
-  return (await client.sendMessage(
-    JSON.stringify(msgJson),
-  )) as CloseAppSessionResponse;
+  return (await client.sendMessage(JSON.stringify(msgJson))) as
+    | CloseAppSessionResponse
+    | ErrorResponse;
 };
 
 export const getAppSession = async (appSessionId: Hex, client: Client) => {
   const msg = createGetAppDefinitionMessageV2(appSessionId);
 
-  return (await client.sendMessage(msg)) as GetAppDefinitionResponse;
+  return (await client.sendMessage(msg)) as
+    | GetAppDefinitionResponse
+    | ErrorResponse;
 };

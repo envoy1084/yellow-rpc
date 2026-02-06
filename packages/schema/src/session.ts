@@ -20,6 +20,7 @@ export const AppSessionSchema = Schema.Struct({
   updatedAt: Schema.DateFromString,
   // User Balance
   userBalance: Schema.Number,
+  version: Schema.Number,
 });
 
 export type AppSession = typeof AppSessionSchema.Type;

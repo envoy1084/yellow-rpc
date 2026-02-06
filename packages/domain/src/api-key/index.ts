@@ -12,7 +12,6 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
     ) => Effect.Effect<void, RedisError>;
     updateApiKey: (
       id: string,
-      walletAddress: string,
       changes: Partial<ApiKey>,
     ) => Effect.Effect<void, RedisError>;
     deleteApiKey: (
@@ -72,7 +71,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
           );
           return keys;
         }),
-      updateApiKey: (id, walletAddress, changes) =>
+      updateApiKey: (id, changes) =>
         Effect.gen(function* () {
           const key = `${suffix}:${id}`;
           const keyExists = yield* redis.exists(key);
@@ -82,7 +81,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
           const encodedChanges = Object.fromEntries(
             Object.entries({
               ...changes,
-              createdAt: changes.updatedAt?.toISOString(),
+              createdAt: changes.createdAt?.toISOString(),
               updatedAt: new Date().toISOString(),
             }).filter(([_, v]) => v !== undefined),
           ) as Record<string, string>;
