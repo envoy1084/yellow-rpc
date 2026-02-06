@@ -7,16 +7,7 @@ import { ApiKeyRepository } from "@yellow-rpc/domain/apiKey";
 import { decryptAesGcm } from "@yellow-rpc/domain/helpers";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import { YellowClient } from "@yellow-rpc/rpc";
-import {
-  Console,
-  Context,
-  Effect,
-  Layer,
-  Option,
-  Queue,
-  Redacted,
-  Ref,
-} from "effect";
+import { Context, Effect, Layer, Option, Queue, Redacted, Ref } from "effect";
 import type { Address, Hex } from "viem";
 
 import { Env } from "@/env";

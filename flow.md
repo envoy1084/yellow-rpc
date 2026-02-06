@@ -62,3 +62,7 @@ Periodically, the backend will try to update the app state with the latest balan
 2. `api_key:<apiKeyId>`: ApiKey
 3. `api_keys:<walletAddress>`: Api Keys created by a user
 4. `api_key_reverse:<hashedApiKey>`: Reverse Lookup for ApiKey
+
+
+## Flow
+
