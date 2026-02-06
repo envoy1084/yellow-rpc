@@ -44,11 +44,3 @@ export const ApiKeySchema = Schema.Struct({
 });
 
 export type ApiKey = typeof ApiKeySchema.Type;
-
-export const CreateApiKeyRequestSchema = ApiKeySchema.pick(
-  "chain",
-  "name",
-  "expiresAt",
-);
-
-export type CreateApiKeyRequest = typeof CreateApiKeyRequestSchema.Type;

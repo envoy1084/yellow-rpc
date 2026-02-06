@@ -33,7 +33,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
       createApiKey: (walletAddress, data) =>
         Effect.gen(function* () {
           const key = `${suffix}:${data.id}`;
-          const arrKey = `user:${walletAddress}:api_keys`;
+          const arrKey = `api_keys:${walletAddress}`;
           yield* redis.sAdd(arrKey, data.id);
           const encoded = Schema.encodeSync(ApiKeySchema)(data);
           yield* redis.hSet(key, encoded);
@@ -41,7 +41,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
       deleteApiKey: (id, walletAddress) =>
         Effect.gen(function* () {
           const key = `${suffix}:${id}`;
-          const arrKey = `user:${walletAddress}:api_keys`;
+          const arrKey = `api_keys:${walletAddress}`;
           yield* redis.sRem(arrKey, id);
           yield* redis.del(key);
         }),
@@ -53,7 +53,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
         }),
       listApiKeys: (walletAddress) =>
         Effect.gen(function* () {
-          const arrKey = `user:${walletAddress}:api_keys`;
+          const arrKey = `api_keys:${walletAddress}`;
           const ids = yield* redis.sMembers(arrKey);
 
           if (ids.length === 0) return [];

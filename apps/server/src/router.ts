@@ -17,19 +17,36 @@ import { HealthLive } from "@/routes/health";
 import { RpcLive } from "@/routes/rpc";
 
 import { EnvLive } from "./env";
-import { AdminLive, SettlementLive } from "./layers";
+import {
+  AdminLive,
+  EncryptionLive,
+  HasherLive,
+  KeyGeneratorLive,
+  SettlementLive,
+} from "./layers";
 import { Middlewares } from "./middlewares";
+import { SessionLive } from "./routes/session";
 
 const YellowRpcApiLive = HttpApiBuilder.api(api).pipe(
+  // Routes
   Layer.provideMerge(HealthLive),
   Layer.provideMerge(ApiKeyLive),
   Layer.provideMerge(RpcLive),
+  Layer.provideMerge(SessionLive),
+  // Layers
+  Layer.provideMerge(EncryptionLive),
+  Layer.provideMerge(HasherLive),
+  Layer.provideMerge(KeyGeneratorLive),
+  // Clients
+  Layer.provideMerge(FetchHttpClient.layer),
+  // Background Workers
   Layer.provideMerge(SettlementLive),
+  Layer.provideMerge(AdminLive),
+  // Repositories
   Layer.provideMerge(ApiKeyRepositoryLive),
   Layer.provideMerge(AppSessionRepositoryLive),
-  Layer.provideMerge(AdminLive),
+  // Environment
   Layer.provideMerge(EnvLive),
-  Layer.provideMerge(FetchHttpClient.layer),
 );
 
 export const HttpLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(

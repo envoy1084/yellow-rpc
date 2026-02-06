@@ -1,14 +1,12 @@
 import { HttpApiBuilder } from "@effect/platform";
 import { api } from "@yellow-rpc/api";
 
-import { activateKeyHandler } from "./activate";
+import { createApiKeyHandler } from "./create";
 import { listApiKeysHandler } from "./list";
-import { prepareApiKeyHandler } from "./prepare";
 
 export const ApiKeyLive = HttpApiBuilder.group(api, "apiKey", (handlers) =>
   handlers
-    .handle("prepareApiKey", ({ payload }) => prepareApiKeyHandler(payload))
-    .handle("activateApiKey", ({ payload }) => activateKeyHandler(payload))
+    .handle("create", ({ payload }) => createApiKeyHandler(payload))
     .handle("listApiKeys", ({ payload }) => listApiKeysHandler(payload)),
 );
 

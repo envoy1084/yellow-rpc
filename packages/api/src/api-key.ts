@@ -1,24 +1,21 @@
 import { HttpApiEndpoint, HttpApiGroup } from "@effect/platform";
 
 import {
-  ActivateApiKeyRequestSchema,
-  ActivateApiKeyResponseSchema,
+  ApiKeyCreationFailed,
+  AppSessionNotFound,
+  CreateApiKeyRequestSchema,
+  CreateApiKeyResponseSchema,
   ListApiKeysRequestSchema,
   ListApiKeysResponseSchema,
-  PrepareApiKeyRequestSchema,
-  PrepareApiKeyResponseSchema,
 } from "./dto";
 
 export const apiKeysGroup = HttpApiGroup.make("apiKey")
   .add(
-    HttpApiEndpoint.post("prepareApiKey", "/api-key/prepare")
-      .setPayload(PrepareApiKeyRequestSchema)
-      .addSuccess(PrepareApiKeyResponseSchema),
-  )
-  .add(
-    HttpApiEndpoint.post("activateApiKey", "/api-key/activate")
-      .setPayload(ActivateApiKeyRequestSchema)
-      .addSuccess(ActivateApiKeyResponseSchema),
+    HttpApiEndpoint.post("create", "/api-key/create")
+      .setPayload(CreateApiKeyRequestSchema)
+      .addSuccess(CreateApiKeyResponseSchema)
+      .addError(ApiKeyCreationFailed, { status: 500 })
+      .addError(AppSessionNotFound, { status: 404 }),
   )
   .add(
     HttpApiEndpoint.post("listApiKeys", "/api-key/list")
