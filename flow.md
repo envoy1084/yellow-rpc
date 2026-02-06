@@ -52,3 +52,13 @@ Periodically, the backend will try to update the app state with the latest balan
 - Signs it with user's sessionKey and admins sessionKey.
 - Sends the message to the network.
 - Capture the update in redis.
+
+
+
+
+## Redis Structure
+
+1. `app_session:<walletAddress>`: AppSession
+2. `api_key:<apiKeyId>`: ApiKey
+3. `api_keys:<walletAddress>`: Api Keys created by a user
+4. `api_key_reverse:<hashedApiKey>`: Reverse Lookup for ApiKey

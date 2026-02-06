@@ -1,5 +1,8 @@
+/** biome-ignore-all assist/source/useSortedKeys:safe */
 import { Schema } from "effect";
 import { DateFromString } from "effect/Schema";
+
+import { AddressSchema } from "./common";
 
 export const SupportedChainSchema = Schema.Union(
   Schema.Literal("ethereum"),
@@ -10,36 +13,34 @@ export const SupportedChainSchema = Schema.Union(
 export type SupportedChain = typeof SupportedChainSchema.Type;
 
 export const ApiKeySchema = Schema.Struct({
-  // Reference to the App Session created for this API Key
+  // Identifiers
+  id: Schema.String,
+  ownerAddress: AddressSchema,
+  // App Session to charge for this Key
   appSessionId: Schema.String,
-  // Chain the API Key is for
+  // Hashed Key
+  hashedKey: Schema.String,
+  // Masked Key to show in frontend
+  maskedKey: Schema.String,
+  // Configuration for the Key
+  name: Schema.NonEmptyString.annotations({
+    message: () => "Name is Required",
+  }),
   chain: SupportedChainSchema.annotations({
     message: () => "Chain is Required",
   }),
-  // CreatedAt timestamp
+  // Key Status
+  status: Schema.Literal("active", "expired"),
+  // Timestamps
   createdAt: DateFromString,
+  updatedAt: DateFromString,
+  lastUsedAt: DateFromString,
   // ExpiresAt timestamp
   expiresAt: DateFromString.pipe(
     Schema.greaterThanDate(new Date(), {
       message: () => "Expiry Date must be greater than current date",
     }),
   ),
-  // Primary Key
-  id: Schema.String,
-  // The hashed key
-  key: Schema.String,
-  // Name for the API Key
-  name: Schema.NonEmptyString.annotations({
-    message: () => "Name is Required",
-  }),
-  // Reference to Owner
-  ownerAddress: Schema.String,
-  // Start characters to show in frontend
-  start: Schema.String,
-  // Status of the API Key
-  status: Schema.Literal("active", "expired", "inactive"),
-  // UpdatedAt timestamp
-  updatedAt: DateFromString,
 });
 
 export type ApiKey = typeof ApiKeySchema.Type;
