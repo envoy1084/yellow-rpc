@@ -53,45 +53,54 @@ export const SettlementLive = Layer.scoped(
         yield* Queue.offer(queue, apiKeyId);
       });
 
-    const { sdk, session } = yield* Effect.acquireRelease(
-      Effect.promise(async () => {
-        const sdk = new YellowClient({
-          url: env.clearNodeWsUrl,
-        });
-
-        await sdk.connect();
-        const session = await sdk.authenticate(admin.walletClient, {
-          allowances: [],
-          application: crypto.randomUUID(),
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 1 year
-          scope: "yellow-rpc.com",
-        });
-
-        return { sdk, session };
-      }),
-      ({ sdk }) => Effect.promise(async () => sdk.disconnect()),
-    ).pipe(Effect.scoped);
-    yield* Effect.log("Authenticated with Admin", session.address);
-
     const worker = Effect.gen(function* () {
       while (true) {
+        yield* Effect.log("Starting Worker");
         const apiKeyId = yield* Queue.take(queue);
         const res = yield* apiKeyRepo.getApiKey(apiKeyId);
+        yield* Effect.log("Api Key Found");
         if (Option.isNone(res)) continue;
         const key = res.value;
         const resSession = yield* appSessionRepo.getAppSession(apiKeyId);
+        yield* Effect.log("App Session Found");
         if (Option.isNone(resSession)) continue;
 
         const appSession = resSession.value;
 
+        yield* Effect.log("Decrypting Session Private Key");
         const userSigner = createECDSAMessageSigner(
           decryptAesGcm({
             encrypted: appSession.sessionPrivateKey,
-            masterKey: Redacted.value(env.adminPrivateKey),
+            masterKey: Redacted.value(env.masterKey),
           }) as Hex,
         );
+        yield* Effect.log("User Signer Created");
 
-        yield* Console.log(`⚡️ [Worker] Starting settlement for: ${apiKeyId}`);
+        const { sdk, session } = yield* Effect.acquireRelease(
+          Effect.promise(async () => {
+            const sdk = new YellowClient({
+              url: env.clearNodeWsUrl,
+            });
+
+            await sdk.connect();
+            const session = await sdk.authenticate(admin.walletClient, {
+              allowances: [],
+              application: `yellow-rpc-${apiKeyId}`,
+              expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 Day
+              scope: "yellow-rpc.com",
+            });
+
+            return { sdk, session };
+          }),
+          ({ sdk }) =>
+            Effect.promise(async () => {
+              console.log("Disconnecting...");
+              await sdk.disconnect();
+            }),
+        );
+        yield* Effect.log("Authenticated with Admin", session.address);
+
+        yield* Effect.log(`⚡️ [Worker] Starting settlement for: ${apiKeyId}`);
         const submitRes = yield* Effect.promise(async () => {
           const res = await sdk.submitAppState(session.signer, [userSigner], {
             allocations: [
@@ -114,6 +123,8 @@ export const SettlementLive = Layer.scoped(
           return res;
         });
 
+        yield* Effect.log("Submit Response: ", submitRes);
+
         if (submitRes.method === RPCMethod.Error) {
           let status: "expired" | "inactive" = "inactive";
           if (key.expiresAt.getTime() < Date.now()) status = "expired";
@@ -128,7 +139,7 @@ export const SettlementLive = Layer.scoped(
           pendingSettlement: 0,
           version: appSession.version + 1,
         });
-        yield* Console.log(`✅ [Worker] Settled: ${apiKeyId}`);
+        yield* Effect.log(`✅ [Worker] Settled: ${apiKeyId}`);
 
         yield* Ref.update(processing, (s) => {
           s.delete(apiKeyId);

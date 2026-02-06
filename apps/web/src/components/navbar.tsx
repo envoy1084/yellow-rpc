@@ -1,5 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 
+import { BalancePill } from "./balance-pill";
 import { ConnectButton } from "./connect-button";
 import { ThemeSwitcher } from "./theme-switcher";
 import { SidebarTrigger } from "./ui/sidebar";
@@ -22,6 +23,7 @@ export const DashboardNavbar = () => {
       <div className="flex flex-row items-center gap-2">
         <ThemeSwitcher />
         <ConnectButton />
+        <BalancePill />
       </div>
     </nav>
   );

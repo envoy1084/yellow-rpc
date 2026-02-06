@@ -1,6 +1,6 @@
 import { RedisCore, type RedisError } from "@envoy1084/effect-redis";
 import { type AppSession, AppSessionSchema } from "@yellow-rpc/schema";
-import { Context, Effect, Layer, type Option, Schema } from "effect";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 
 export class AppSessionRepository extends Context.Tag("AppSessionRepository")<
   AppSessionRepository,
@@ -36,7 +36,10 @@ export const AppSessionRepositoryLive = Layer.effect(
         Effect.gen(function* () {
           const key = `${suffix}:${apiKeyId}`;
           const res = yield* redis.hGetAll(key);
-          return Schema.decodeUnknownOption(AppSessionSchema)(res);
+          yield* Effect.log("Get App Session Redis Result", res);
+          const r = Schema.decodeUnknownSync(AppSessionSchema)(res);
+          yield* Effect.log("Decoded", r);
+          return Option.some(r);
         }),
       updateAppSession: (apiKeyId, changes) =>
         Effect.gen(function* () {

@@ -20,7 +20,7 @@ export const PrepareApiKeyRequestSchema = CreateApiKeyRequestSchema.pipe(
 
 export const PrepareApiKeyResponseSchema = Schema.Struct({
   apiKeyId: Schema.String,
-  authMessage: Schema.String,
+  authParams: Schema.String,
 });
 
 export const ActivateApiKeyRequestSchema = Schema.Struct({

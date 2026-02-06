@@ -1,12 +1,18 @@
+import { FetchHttpClient, HttpApiClient } from "@effect/platform";
+import { useAtomSet } from "@effect-atom/atom-react";
 import { effectTsResolver } from "@hookform/resolvers/effect-ts";
 import { CalendarIcon } from "@phosphor-icons/react";
 import {
+  api,
   type PrepareApiKeyRequest,
   type PrepareApiKeyRequestEncoded,
   PrepareApiKeyRequestSchema,
 } from "@yellow-rpc/api";
+import { YellowClient } from "@yellow-rpc/rpc";
 import { format } from "date-fns";
+import { Effect } from "effect";
 import { Controller, useForm } from "react-hook-form";
+import { useConnection, useWalletClient } from "wagmi";
 
 import { BaseIcon, EthereumIcon, OptimismIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -55,7 +61,10 @@ const chains = [
   },
 ];
 
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: safe
 export const CreateApiKeyForm = () => {
+  const { address } = useConnection();
+  const { data: walletClient } = useWalletClient();
   const form = useForm<
     PrepareApiKeyRequestEncoded,
     unknown,
@@ -66,13 +75,43 @@ export const CreateApiKeyForm = () => {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       initialBalance: "0",
       name: "",
+      walletAddress: address,
     },
     resolver: effectTsResolver(PrepareApiKeyRequestSchema),
   });
 
-  const onSubmit = (data: PrepareApiKeyRequest) => {
-    // TODO: Implement this
+  const onSubmit = async (data: PrepareApiKeyRequest) => {
+    if (!walletClient) return;
     console.log(data);
+    const program = Effect.gen(function* () {
+      const client = yield* HttpApiClient.make(api, {
+        baseUrl: "http://localhost:8080",
+      });
+
+      const res = yield* client.apiKey.prepareApiKey({ payload: data });
+      console.log(res);
+      yield* Effect.promise(async () => {
+        const c = new YellowClient({
+          url: "wss://clearnet-sandbox.yellow.com/ws",
+        });
+        await c.connect();
+        await c.authenticateWithParams(walletClient, res.authParams);
+      });
+      const { apiKey } = yield* client.apiKey.activateApiKey({
+        payload: {
+          apiKeyId: res.apiKeyId,
+          signature: "",
+          walletAddress: data.walletAddress,
+        },
+      });
+      yield* Effect.log("API Key Activated", apiKey);
+      return apiKey;
+    });
+    const res = await Effect.runPromise(
+      program.pipe(Effect.provide(FetchHttpClient.layer)),
+    );
+
+    console.log(res);
   };
 
   return (

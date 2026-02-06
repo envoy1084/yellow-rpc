@@ -31,7 +31,9 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     const apiKeyRepo = yield* ApiKeyRepository;
     const appSessionRepo = yield* AppSessionRepository;
 
+    yield* Effect.log("Getting App Session");
     const appSession = yield* appSessionRepo.getAppSession(data.apiKeyId);
+    yield* Effect.log("App Session Found", appSession);
 
     if (Option.isNone(appSession)) {
       return yield* Effect.fail(
@@ -44,7 +46,7 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     const userSigner = createECDSAMessageSigner(
       decryptAesGcm({
         encrypted: appSession.value.sessionPrivateKey,
-        masterKey: Redacted.value(env.adminPrivateKey),
+        masterKey: Redacted.value(env.masterKey),
       }) as Hex,
     );
 
@@ -52,6 +54,7 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     // TODO: Implement this
 
     // Step 2: Create a new App Session (admin)
+    yield* Effect.log("Creating new Yellow Client App Session");
     const res = yield* Effect.promise(async () => {
       const sdk = new YellowClient({
         url: env.clearNodeWsUrl,
@@ -72,6 +75,11 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
             asset: "ytest.usd",
             participant: data.walletAddress as Address,
           },
+          {
+            amount: appSession.value.adminBalance.toString(),
+            asset: "ytest.usd",
+            participant: env.adminAddress as Address,
+          },
         ],
         definition: {
           application: `yellow-rpc-${data.apiKeyId}`,
@@ -82,13 +90,15 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
             data.walletAddress as Address,
           ],
           protocol: RPCProtocolVersion.NitroRPC_0_4,
-          quorum: 2, // Requires unanimous agreement
+          quorum: 1, // Requires unanimous agreement
           weights: [1, 1], // Equal voting power
         },
       });
 
       return res;
     });
+
+    yield* Effect.log("App Session Created", res);
 
     if (res.method === RPCMethod.Error) {
       return yield* Effect.fail(new Error(res.params.error));
@@ -97,7 +107,7 @@ export const activateKeyHandler = (data: ActivateApiKeyRequest) =>
     const appSessionId = res.params.appSessionId;
 
     // Step 3: Create a new API Key, update status to active
-    const apiKey = `yellow_rpc_${createRandomStringGenerator("a-z", "A-Z", "0-9")(10)}`;
+    const apiKey = `yellow_rpc_${createRandomStringGenerator("a-z", "A-Z", "0-9")(21)}`;
     const hashed = keyHasher(apiKey);
 
     const redis = yield* RedisCore;

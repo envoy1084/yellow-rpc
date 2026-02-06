@@ -11,7 +11,7 @@ export type SupportedChain = typeof SupportedChainSchema.Type;
 
 export const ApiKeySchema = Schema.Struct({
   // Reference to the App Session created for this API Key
-  appSessionId: Schema.optional(Schema.String),
+  appSessionId: Schema.String,
   // Chain the API Key is for
   chain: SupportedChainSchema.annotations({
     message: () => "Chain is Required",

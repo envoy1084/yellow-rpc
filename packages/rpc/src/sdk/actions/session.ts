@@ -29,8 +29,14 @@ export const createAppSession = async (
     participantSigners.map((s) => s(msgJson.req as RPCData)),
   );
 
-  msgJson.sig.push(...participantSigs);
-  return (await client.sendMessage(msg)) as
+  console.log("Participant Sigs: ", participantSigs);
+
+  const updatedMsgJson = {
+    req: msgJson.req,
+    sig: [...msgJson.sig, ...participantSigs],
+  };
+  console.log("Message: ", updatedMsgJson);
+  return (await client.sendMessage(JSON.stringify(updatedMsgJson))) as
     | CreateAppSessionResponse
     | ErrorResponse;
 };

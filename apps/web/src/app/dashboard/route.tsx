@@ -2,8 +2,10 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { AppSidebar, DashboardNavbar } from "@/components";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useYellow } from "@/hooks";
 
 const DashboardLayout = () => {
+  useYellow();
   return (
     <SidebarProvider>
       <AppSidebar />

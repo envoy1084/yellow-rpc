@@ -2,7 +2,7 @@ import { Schema } from "effect";
 
 export const AppSessionSchema = Schema.Struct({
   // Admin Balance
-  adminBalance: Schema.Number,
+  adminBalance: Schema.NumberFromString,
   // Asset
   asset: Schema.String,
   // Timestamps
@@ -10,7 +10,7 @@ export const AppSessionSchema = Schema.Struct({
   // App Session Id
   id: Schema.String,
   // Pending Settlements
-  pendingSettlement: Schema.Number,
+  pendingSettlement: Schema.NumberFromString,
   // Hashed Session Private Key
   sessionPrivateKey: Schema.String,
   // Session Public Key
@@ -19,8 +19,8 @@ export const AppSessionSchema = Schema.Struct({
   status: Schema.Literal("open", "closed", "challenged", "inactive"),
   updatedAt: Schema.DateFromString,
   // User Balance
-  userBalance: Schema.Number,
-  version: Schema.Number,
+  userBalance: Schema.NumberFromString,
+  version: Schema.NumberFromString,
 });
 
 export type AppSession = typeof AppSessionSchema.Type;
