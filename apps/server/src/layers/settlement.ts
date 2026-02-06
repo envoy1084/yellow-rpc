@@ -54,21 +54,24 @@ export const SettlementLive = Layer.scoped(
         yield* Queue.offer(queue, apiKeyId);
       });
 
-    const { sdk, session } = yield* Effect.promise(async () => {
-      const sdk = new YellowClient({
-        url: env.clearNodeWsUrl,
-      });
+    const { sdk, session } = yield* Effect.acquireRelease(
+      Effect.promise(async () => {
+        const sdk = new YellowClient({
+          url: env.clearNodeWsUrl,
+        });
 
-      await sdk.connect();
-      const session = await sdk.authenticate(admin.walletClient, {
-        allowances: [],
-        application: crypto.randomUUID(),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 365 days
-        scope: "yellow-rpc",
-      });
+        await sdk.connect();
+        const session = await sdk.authenticate(admin.walletClient, {
+          allowances: [],
+          application: crypto.randomUUID(),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 365 days
+          scope: "yellow-rpc",
+        });
 
-      return { sdk, session };
-    });
+        return { sdk, session };
+      }),
+      ({ sdk }) => Effect.promise(async () => sdk.disconnect()),
+    );
 
     const worker = Effect.gen(function* () {
       while (true) {
