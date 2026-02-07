@@ -1,4 +1,11 @@
+/** biome-ignore-all lint/complexity/noExcessiveLinesPerFunction: safe */
 import { useState } from "react";
+
+// import { useQueryClient } from "@tanstack/react-query";
+
+// import { useQueryClient } from "@tanstack/react-query";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { effectTsResolver } from "@hookform/resolvers/effect-ts";
 import {
@@ -15,6 +22,7 @@ import {
 import { AddressSchema } from "@yellow-rpc/schema";
 import { format } from "date-fns";
 import { Effect } from "effect";
+// import { Effect } from "effect";
 import { Controller, useForm } from "react-hook-form";
 import { useConnection, useWalletClient } from "wagmi";
 
@@ -42,6 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { YellowRpcHttpClient } from "@/layers";
+import { queryKeys } from "@/lib/query";
 import { RuntimeClient } from "@/lib/runtime";
 
 const chains = [
@@ -65,6 +74,7 @@ const chains = [
 export const CreateApiKeyForm = () => {
   const { address } = useConnection();
   const { data: walletClient } = useWalletClient();
+  const queryClient = useQueryClient();
   const form = useForm<
     CreateApiKeyRequestEncoded,
     unknown,
@@ -94,6 +104,7 @@ export const CreateApiKeyForm = () => {
   const onSubmit = async (data: CreateApiKeyRequest) => {
     if (!address) return;
     if (!walletClient) return;
+    const walletAddress = AddressSchema.make(address);
     const program = Effect.gen(function* () {
       const client = yield* YellowRpcHttpClient;
       const { apiKey } = yield* client.apiKey.create({
@@ -104,6 +115,9 @@ export const CreateApiKeyForm = () => {
 
     const apiKey = await RuntimeClient.runPromise(program);
     setApiKey(apiKey);
+    await queryClient.invalidateQueries({
+      ...queryKeys.apiKeys.list(walletAddress),
+    });
   };
 
   return (

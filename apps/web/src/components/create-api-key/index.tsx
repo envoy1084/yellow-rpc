@@ -14,7 +14,7 @@ import { CreateApiKeyForm } from "./form";
 export const CreateApiKey = () => {
   return (
     <Dialog disablePointerDismissal={true}>
-      <DialogTrigger render={<Button variant="secondary" />}>
+      <DialogTrigger render={<Button variant="outline" />}>
         <PlusIcon />
         Create API Key
       </DialogTrigger>

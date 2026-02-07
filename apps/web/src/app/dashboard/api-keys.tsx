@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ApiKeyList, CreateApiKey } from "@/components";
+import { useApiKeys } from "@/hooks";
 
 export const Route = createFileRoute("/dashboard/api-keys")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { data } = useApiKeys();
   return (
     <div className="max-w-5xl w-full mx-auto px-4 flex flex-col gap-4">
       <div className="flex flex-row items-start gap-2 justify-between">
@@ -18,7 +20,7 @@ function RouteComponent() {
         </div>
         <CreateApiKey />
       </div>
-      <ApiKeyList />
+      <ApiKeyList apiKeys={Array.from(data ?? [])} />
     </div>
   );
 }

@@ -8,31 +8,26 @@ import { YellowRpcHttpClient } from "@/layers";
 import { queryKeys } from "@/lib/query";
 import { RuntimeClient } from "@/lib/runtime";
 
-export const useAppSession = () => {
-  const { address } = useConnection();
-
-  const appSession = useQuery({
+export const useApiKeys = () => {
+  const { address, isConnected } = useConnection();
+  const apiKeys = useQuery({
+    enabled: isConnected && Boolean(address),
     queryFn: async () => {
-      console.log("Running Query getAppSession");
-      if (!address) return { session: null };
-
-      const walletAddress = AddressSchema.make(address);
-
+      const walletAddress = AddressSchema.make(address!);
       const program = Effect.gen(function* () {
         const client = yield* YellowRpcHttpClient;
-
-        const res = yield* client.session.getSession({
+        const res = yield* client.apiKey.listApiKeys({
           payload: { walletAddress },
         });
-
         return res;
       });
 
-      const session = await RuntimeClient.runPromise(program);
-      return session;
+      const apiKeys = await RuntimeClient.runPromise(program);
+      console.log("API Keys: ", apiKeys);
+      return apiKeys;
     },
-    ...queryKeys.appSession.get(address),
+    ...queryKeys.apiKeys.list(address),
   });
 
-  return appSession;
+  return apiKeys;
 };

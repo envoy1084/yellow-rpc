@@ -30,20 +30,6 @@ import {
 import { BaseIcon, EthereumIcon, OptimismIcon } from "../icons";
 import { Badge } from "../ui/badge";
 
-const apiKey: ApiKey = {
-  chain: "ethereum",
-  createdAt: new Date(2026, 2, 2),
-  expiresAt: new Date(2028, 1, 1),
-  id: "728ed52f",
-  key: "0x1234567890abcdef",
-  name: "My API Key",
-  ownerAddress: "0x1234567890abcdef",
-  start: "sk_live_cbaaca",
-  status: "active",
-  updatedAt: new Date(2026, 2, 2),
-};
-export const apiKeys: ApiKey[] = [apiKey, apiKey, apiKey, apiKey];
-
 export const columns: ColumnDef<ApiKey>[] = [
   {
     accessorKey: "name",
@@ -52,7 +38,7 @@ export const columns: ColumnDef<ApiKey>[] = [
   {
     accessorKey: "key",
     cell: ({ row }) => {
-      const truncatedKey = `${row.original.start}...`;
+      const truncatedKey = `${row.original.maskedKey}...`;
       return truncatedKey;
     },
     header: "Token",
@@ -86,8 +72,6 @@ export const columns: ColumnDef<ApiKey>[] = [
       const statusText = (() => {
         if (status === "active")
           return { children: "Active", variant: "success" } as const;
-        if (status === "inactive")
-          return { children: "Inactive", variant: "default" } as const;
         return { children: "Expired", variant: "destructive" } as const;
       })();
 
@@ -139,7 +123,10 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
 ];
 
-export const ApiKeyList = () => {
+type ApiKeyListProps = {
+  apiKeys: ApiKey[];
+};
+export const ApiKeyList = ({ apiKeys }: ApiKeyListProps) => {
   const table = useReactTable({
     columns,
     data: apiKeys,
@@ -187,8 +174,11 @@ export const ApiKeyList = () => {
             ))
           ) : (
             <TableRow>
-              <TableCell className="h-24 text-center" colSpan={columns.length}>
-                No results.
+              <TableCell
+                className="h-24 text-center rounded-xl"
+                colSpan={columns.length}
+              >
+                No API Keys found.
               </TableCell>
             </TableRow>
           )}
