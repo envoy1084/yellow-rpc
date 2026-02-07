@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { ChartBarIcon, CommandIcon, KeyIcon } from "@phosphor-icons/react";
+import { CommandIcon, MoneyIcon } from "@phosphor-icons/react";
 
 import { YellowRPCIcon } from "./icons";
 import {
@@ -22,18 +22,11 @@ const sidebarItems = [
     tooltip: "Dashboard",
   },
   {
-    href: "/dashboard/api-keys",
-    icon: KeyIcon,
-    key: "api-keys",
-    label: "API Keys",
-    tooltip: "API Keys",
-  },
-  {
-    href: "/dashboard/analytics",
-    icon: ChartBarIcon,
-    key: "analytics",
-    label: "Analytics",
-    tooltip: "Analytics",
+    href: "/dashboard/billing",
+    icon: MoneyIcon,
+    key: "billings",
+    label: "Billings",
+    tooltip: "Billings",
   },
 ] as const;
 

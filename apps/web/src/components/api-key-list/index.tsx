@@ -80,6 +80,13 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: "Status",
   },
   {
+    accessorKey: "lastUsedAt",
+    cell: ({ row }) => {
+      return format(row.original.lastUsedAt, "PPP");
+    },
+    header: "Last Used",
+  },
+  {
     accessorKey: "createdAt",
     cell: ({ row }) => {
       return format(row.original.createdAt, "PPP");

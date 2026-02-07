@@ -23,6 +23,8 @@ const badgeVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
         success: "bg-green-600 text-white [a]:hover:bg-green-500/80",
+        "success-ghost":
+          "bg-green-400/10 text-green-400 [a]:hover:bg-green-500/80",
       },
     },
   },

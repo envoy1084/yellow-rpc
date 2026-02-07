@@ -12,12 +12,9 @@ export const useAppSession = () => {
   const { address } = useConnection();
 
   const appSession = useQuery({
+    enabled: Boolean(address),
     queryFn: async () => {
-      console.log("Running Query getAppSession");
-      if (!address) return { session: null };
-
-      const walletAddress = AddressSchema.make(address);
-
+      const walletAddress = AddressSchema.make(address!);
       const program = Effect.gen(function* () {
         const client = yield* YellowRpcHttpClient;
 
@@ -25,12 +22,13 @@ export const useAppSession = () => {
           payload: { walletAddress },
         });
 
-        return res;
+        return res.session;
       });
 
       const session = await RuntimeClient.runPromise(program);
       return session;
     },
+    refetchInterval: 1000 * 5, // 5 sec
     ...queryKeys.appSession.get(address),
   });
 

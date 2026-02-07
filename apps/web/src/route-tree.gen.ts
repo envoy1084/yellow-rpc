@@ -12,8 +12,7 @@ import { Route as rootRouteImport } from "./app/__root";
 import { Route as DashboardRouteRouteImport } from "./app/dashboard/route";
 import { Route as IndexRouteImport } from "./app/index";
 import { Route as DashboardIndexRouteImport } from "./app/dashboard/index";
-import { Route as DashboardApiKeysRouteImport } from "./app/dashboard/api-keys";
-import { Route as DashboardAnalyticsRouteImport } from "./app/dashboard/analytics";
+import { Route as DashboardBillingRouteImport } from "./app/dashboard/billing";
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: "/dashboard",
@@ -30,55 +29,36 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: "/",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
-const DashboardApiKeysRoute = DashboardApiKeysRouteImport.update({
-  id: "/api-keys",
-  path: "/api-keys",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
-const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
-  id: "/analytics",
-  path: "/analytics",
+const DashboardBillingRoute = DashboardBillingRouteImport.update({
+  id: "/billing",
+  path: "/billing",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
-  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
-  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
+  "/dashboard/billing": typeof DashboardBillingRoute;
   "/dashboard/": typeof DashboardIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
-  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
+  "/dashboard/billing": typeof DashboardBillingRoute;
   "/dashboard": typeof DashboardIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
-  "/dashboard/analytics": typeof DashboardAnalyticsRoute;
-  "/dashboard/api-keys": typeof DashboardApiKeysRoute;
+  "/dashboard/billing": typeof DashboardBillingRoute;
   "/dashboard/": typeof DashboardIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths:
-    | "/"
-    | "/dashboard"
-    | "/dashboard/analytics"
-    | "/dashboard/api-keys"
-    | "/dashboard/";
+  fullPaths: "/" | "/dashboard" | "/dashboard/billing" | "/dashboard/";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/dashboard/analytics" | "/dashboard/api-keys" | "/dashboard";
-  id:
-    | "__root__"
-    | "/"
-    | "/dashboard"
-    | "/dashboard/analytics"
-    | "/dashboard/api-keys"
-    | "/dashboard/";
+  to: "/" | "/dashboard/billing" | "/dashboard";
+  id: "__root__" | "/" | "/dashboard" | "/dashboard/billing" | "/dashboard/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -109,32 +89,23 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
-    "/dashboard/api-keys": {
-      id: "/dashboard/api-keys";
-      path: "/api-keys";
-      fullPath: "/dashboard/api-keys";
-      preLoaderRoute: typeof DashboardApiKeysRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
-    "/dashboard/analytics": {
-      id: "/dashboard/analytics";
-      path: "/analytics";
-      fullPath: "/dashboard/analytics";
-      preLoaderRoute: typeof DashboardAnalyticsRouteImport;
+    "/dashboard/billing": {
+      id: "/dashboard/billing";
+      path: "/billing";
+      fullPath: "/dashboard/billing";
+      preLoaderRoute: typeof DashboardBillingRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
   }
 }
 
 interface DashboardRouteRouteChildren {
-  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute;
-  DashboardApiKeysRoute: typeof DashboardApiKeysRoute;
+  DashboardBillingRoute: typeof DashboardBillingRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
-  DashboardApiKeysRoute: DashboardApiKeysRoute,
+  DashboardBillingRoute: DashboardBillingRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 };
 

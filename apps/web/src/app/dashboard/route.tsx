@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { AppSidebar, DashboardNavbar } from "@/components";
+import { CreateSession } from "@/components/create-session";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useYellow } from "@/hooks";
 
@@ -15,6 +16,7 @@ const DashboardLayout = () => {
           <Outlet />
         </div>
       </div>
+      <CreateSession />
     </SidebarProvider>
   );
 };
