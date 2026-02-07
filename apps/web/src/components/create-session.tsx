@@ -58,38 +58,32 @@ export const CreateSession = () => {
   };
 
   return (
-    <QueryBoundary query={appSession}>
-      {({ Loading, Success }) => (
+    <QueryBoundary checkIsEmpty={(d) => d === null} query={appSession}>
+      {({ Loading, Empty }) => (
         <>
           <Loading>Loading...</Loading>
-          <Success>
-            {(session) => {
-              if (session) return null;
-
-              return (
-                <Dialog open={true}>
-                  <DialogContent
-                    className="max-w-md! w-full"
-                    showCloseButton={false}
-                  >
-                    <DialogHeader className="py-2 gap-4">
-                      <DialogTitle className="flex flex-row items-center justify-center gap-2">
-                        <YellowRPCIcon className="size-8 rounded-md" />
-                        <span className="font-medium text-2xl">YellowRPC</span>
-                      </DialogTitle>
-                      <DialogDescription className="text-center">
-                        Create a new app session to start using YellowRPC. You
-                        can deposit and withdraw funds from your app session.
-                      </DialogDescription>
-                      <Button onClick={createAppSession}>
-                        Create App Session
-                      </Button>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
-              );
-            }}
-          </Success>
+          <Empty>
+            return (
+            <Dialog open={true}>
+              <DialogContent
+                className="max-w-md! w-full"
+                showCloseButton={false}
+              >
+                <DialogHeader className="py-2 gap-4">
+                  <DialogTitle className="flex flex-row items-center justify-center gap-2">
+                    <YellowRPCIcon className="size-8 rounded-md" />
+                    <span className="font-medium text-2xl">YellowRPC</span>
+                  </DialogTitle>
+                  <DialogDescription className="text-center">
+                    Create a new app session to start using YellowRPC. You can
+                    deposit and withdraw funds from your app session.
+                  </DialogDescription>
+                  <Button onClick={createAppSession}>Create App Session</Button>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+            );
+          </Empty>
         </>
       )}
     </QueryBoundary>

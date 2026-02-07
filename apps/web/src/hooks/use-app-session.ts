@@ -13,6 +13,7 @@ export const useAppSession = () => {
 
   const appSession = useQuery({
     queryFn: async () => {
+      console.log("Running Query getAppSession");
       if (!address) return null;
 
       const walletAddress = AddressSchema.make(address);
@@ -28,6 +29,7 @@ export const useAppSession = () => {
       });
 
       const session = await RuntimeClient.runPromise(program);
+      console.log("Session: ", session);
       return session;
     },
     ...queryKeys.appSession.get(
