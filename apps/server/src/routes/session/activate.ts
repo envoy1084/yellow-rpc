@@ -53,7 +53,13 @@ export const activateAppSessionHandler = (data: ActivateAppSessionRequest) =>
           admin.session.signer,
           [userSessionSigner],
           {
-            allocations: [],
+            allocations: [
+              {
+                amount: "10",
+                asset: "ytest.usd",
+                participant: data.walletAddress,
+              },
+            ],
             definition: {
               application: "YellowRPC",
               challenge: 0, // No challenge period

@@ -22,7 +22,7 @@ export const EncryptionLive = Layer.effect(
     return Encryption.of({
       decrypt: (encrypted: string) =>
         Effect.sync(() => {
-          const data = Buffer.from(encrypted, "base64");
+          const data = Buffer.from(encrypted, "hex");
           const iv = data.subarray(0, 12);
           const tag = data.subarray(12, 28);
           const ciphertext = data.subarray(28);

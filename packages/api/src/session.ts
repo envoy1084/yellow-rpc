@@ -6,18 +6,26 @@ import {
   AppSessionCreationFailed,
   AppSessionNotFound,
   AppSessionUpdateFailed,
+  GetAppSessionRequestSchema,
+  GetAppSessionResponseSchema,
   PrepareCreateAppSessionResponseSchema,
   PrepareCreateAppSessionSchema,
 } from "./dto";
 
 export const sessionGroup = HttpApiGroup.make("session")
   .add(
-    HttpApiEndpoint.get("prepare", "/session/prepare")
-      .setPayload(PrepareCreateAppSessionSchema)
-      .addSuccess(PrepareCreateAppSessionResponseSchema),
+    HttpApiEndpoint.get("getSession", "/session")
+      .addSuccess(GetAppSessionResponseSchema)
+      .setPayload(GetAppSessionRequestSchema),
   )
   .add(
-    HttpApiEndpoint.get("activate", "/session/activate")
+    HttpApiEndpoint.post("prepare", "/session/prepare")
+      .setPayload(PrepareCreateAppSessionSchema)
+      .addSuccess(PrepareCreateAppSessionResponseSchema)
+      .addError(AppSessionCreationFailed, { status: 500 }),
+  )
+  .add(
+    HttpApiEndpoint.post("activate", "/session/activate")
       .setPayload(ActivateAppSessionRequestSchema)
       .addSuccess(ActivateAppSessionResponseSchema)
       .addError(AppSessionNotFound, { status: 404 })

@@ -1,4 +1,4 @@
-import { AddressSchema } from "@yellow-rpc/schema";
+import { AddressSchema, AppSessionSchema } from "@yellow-rpc/schema";
 import { Schema } from "effect";
 
 export const PrepareCreateAppSessionSchema = Schema.Struct({
@@ -20,6 +20,14 @@ export const ActivateAppSessionResponseSchema = Schema.Struct({
   appSessionId: Schema.String,
 });
 
+export const GetAppSessionRequestSchema = Schema.Struct({
+  walletAddress: Schema.optional(AddressSchema),
+});
+
+export const GetAppSessionResponseSchema = Schema.Struct({
+  session: Schema.Union(Schema.Null, AppSessionSchema),
+});
+
 export type PrepareCreateAppSessionRequest =
   typeof PrepareCreateAppSessionSchema.Type;
 export type PrepareCreateAppSessionResponse =
@@ -29,6 +37,9 @@ export type ActivateAppSessionRequest =
   typeof ActivateAppSessionRequestSchema.Type;
 export type ActivateAppSessionResponse =
   typeof ActivateAppSessionResponseSchema.Type;
+
+export type GetAppSessionRequest = typeof GetAppSessionRequestSchema.Type;
+export type GetAppSessionResponse = typeof GetAppSessionResponseSchema.Type;
 
 export class AppSessionNotFound extends Schema.TaggedError<AppSessionNotFound>()(
   "AppSessionNotFound",

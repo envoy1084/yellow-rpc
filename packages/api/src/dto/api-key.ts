@@ -17,6 +17,8 @@ export const CreateApiKeyResponseSchema = Schema.Struct({
   apiKey: Schema.String,
 });
 export type CreateApiKeyRequest = typeof CreateApiKeyRequestSchema.Type;
+export type CreateApiKeyRequestEncoded =
+  typeof CreateApiKeyRequestSchema.Encoded;
 export type CreateApiKeyResponse = typeof CreateApiKeyResponseSchema.Type;
 export type ListApiKeysRequest = typeof ListApiKeysRequestSchema.Type;
 export type ListApiKeysResponse = typeof ListApiKeysResponseSchema.Type;

@@ -1,14 +1,20 @@
+import { useState } from "react";
+
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
-import { useAtomSet } from "@effect-atom/atom-react";
 import { effectTsResolver } from "@hookform/resolvers/effect-ts";
-import { CalendarIcon } from "@phosphor-icons/react";
+import {
+  BellIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  CopyIcon,
+} from "@phosphor-icons/react";
 import {
   api,
-  type PrepareApiKeyRequest,
-  type PrepareApiKeyRequestEncoded,
-  PrepareApiKeyRequestSchema,
+  type CreateApiKeyRequest,
+  type CreateApiKeyRequestEncoded,
+  CreateApiKeyRequestSchema,
 } from "@yellow-rpc/api";
-import { YellowClient } from "@yellow-rpc/rpc";
+import { AddressSchema } from "@yellow-rpc/schema";
 import { format } from "date-fns";
 import { Effect } from "effect";
 import { Controller, useForm } from "react-hook-form";
@@ -24,11 +30,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
@@ -66,52 +67,51 @@ export const CreateApiKeyForm = () => {
   const { address } = useConnection();
   const { data: walletClient } = useWalletClient();
   const form = useForm<
-    PrepareApiKeyRequestEncoded,
+    CreateApiKeyRequestEncoded,
     unknown,
-    PrepareApiKeyRequest
+    CreateApiKeyRequest
   >({
     defaultValues: {
       chain: "ethereum",
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      initialBalance: "0",
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       name: "",
-      walletAddress: address,
+      ownerAddress: address ? AddressSchema.make(address) : undefined,
     },
-    resolver: effectTsResolver(PrepareApiKeyRequestSchema),
+    resolver: effectTsResolver(CreateApiKeyRequestSchema),
   });
 
-  const onSubmit = async (data: PrepareApiKeyRequest) => {
+  const [apiKey, setApiKey] = useState<string | undefined>();
+
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  const onSubmit = async (data: CreateApiKeyRequest) => {
+    if (!address) return;
     if (!walletClient) return;
-    console.log(data);
     const program = Effect.gen(function* () {
       const client = yield* HttpApiClient.make(api, {
         baseUrl: "http://localhost:8080",
       });
+      yield* Effect.log("Creating Api Key");
+      const { apiKey } = yield* client.apiKey.create({
+        payload: data,
+      });
 
-      const res = yield* client.apiKey.prepareApiKey({ payload: data });
-      console.log(res);
-      yield* Effect.promise(async () => {
-        const c = new YellowClient({
-          url: "wss://clearnet-sandbox.yellow.com/ws",
-        });
-        await c.connect();
-        await c.authenticateWithParams(walletClient, res.authParams);
-      });
-      const { apiKey } = yield* client.apiKey.activateApiKey({
-        payload: {
-          apiKeyId: res.apiKeyId,
-          signature: "",
-          walletAddress: data.walletAddress,
-        },
-      });
-      yield* Effect.log("API Key Activated", apiKey);
       return apiKey;
     });
-    const res = await Effect.runPromise(
+
+    const apiKey = await Effect.runPromise(
       program.pipe(Effect.provide(FetchHttpClient.layer)),
     );
 
-    console.log(res);
+    setApiKey(apiKey);
   };
 
   return (
@@ -120,6 +120,29 @@ export const CreateApiKeyForm = () => {
       id="create-api-key"
       onSubmit={form.handleSubmit(onSubmit)}
     >
+      {apiKey && (
+        <div className="flex flex-col items-start gap-2 bg-green-400/10! p-2 text-sm rounded-lg border-green-400/20 border">
+          <div className="flex flex-row items-start gap-2">
+            <BellIcon className="size-5 pt-0.5" />
+            <div className="text-sm">
+              Make sure to save this API Key, you will not be able to see it
+              again.
+            </div>
+          </div>
+          <div className="flex flex-row items-center justify-between bg-muted px-2 py-1 rounded-sm border w-full">
+            <span>{apiKey}</span>
+            <Button
+              className=""
+              onClick={() => copyToClipboard(apiKey)}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              {copied ? <CheckCircleIcon /> : <CopyIcon />}
+            </Button>
+          </div>
+        </div>
+      )}
       <FieldGroup>
         <Controller
           control={form.control}
@@ -225,32 +248,6 @@ export const CreateApiKeyForm = () => {
           )}
         />
       </FieldGroup>
-      <Controller
-        control={form.control}
-        name="initialBalance"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="create-api-key-balance">Label</FieldLabel>
-            <InputGroup
-              {...field}
-              aria-invalid={fieldState.invalid}
-              id="create-api-key-label"
-            >
-              <InputGroupInput
-                {...field}
-                aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                className="reset-input-number"
-                id="create-api-key-label"
-                placeholder="Initial Balance"
-                type="number"
-              />
-              <InputGroupAddon align="inline-end">USD</InputGroupAddon>
-            </InputGroup>
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
       <Button className="w-full" type="submit">
         Create API Key
       </Button>

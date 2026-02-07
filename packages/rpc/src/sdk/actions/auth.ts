@@ -98,7 +98,7 @@ export const authenticateWithParams = (
   walletClient: WalletClient,
   authParams: string,
   client: Client,
-) => {
+): Promise<void> => {
   return new Promise(async (resolve, reject) => {
     let removeListener: (() => void) | undefined;
 

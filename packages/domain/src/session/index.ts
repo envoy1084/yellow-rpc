@@ -36,9 +36,8 @@ export const AppSessionRepositoryLive = Layer.effect(
         Effect.gen(function* () {
           const key = `${suffix}:${walletAddress}`;
           const res = yield* redis.hGetAll(key);
-          yield* Effect.log("Get App Session Redis Result", res);
+          if (Object.keys(res).length === 0) return Option.none();
           const r = Schema.decodeUnknownSync(AppSessionSchema)(res);
-          yield* Effect.log("Decoded", r);
           return Option.some(r);
         }),
       updateAppSession: (walletAddress, changes) =>

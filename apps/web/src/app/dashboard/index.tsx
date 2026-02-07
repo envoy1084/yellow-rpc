@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { CreateSession } from "@/components/create-session";
 import { Button } from "@/components/ui/button";
 import { useAuthenticate } from "@/hooks";
 
@@ -20,6 +21,7 @@ function RouteComponent() {
         >
           Authenticate
         </Button>
+        <CreateSession />
         <div className="flex flex-row items-center gap-2 justify-between">
           <div>API Keys</div>
         </div>
