@@ -1,4 +1,4 @@
-import { ApiKeySchema } from "@yellow-rpc/schema";
+import { AddressSchema, ApiKeySchema } from "@yellow-rpc/schema";
 import { Schema } from "effect";
 
 export const ListApiKeysRequestSchema = Schema.Struct({
@@ -16,12 +16,25 @@ export const CreateApiKeyRequestSchema = ApiKeySchema.pick(
 export const CreateApiKeyResponseSchema = Schema.Struct({
   apiKey: Schema.String,
 });
+
+export const DeleteApiKeyRequestSchema = Schema.Struct({
+  id: Schema.String,
+  walletAddress: AddressSchema,
+});
+
+export const DeleteApiKeyResponseSchema = Schema.Struct({
+  success: Schema.Boolean,
+});
+
 export type CreateApiKeyRequest = typeof CreateApiKeyRequestSchema.Type;
 export type CreateApiKeyRequestEncoded =
   typeof CreateApiKeyRequestSchema.Encoded;
 export type CreateApiKeyResponse = typeof CreateApiKeyResponseSchema.Type;
 export type ListApiKeysRequest = typeof ListApiKeysRequestSchema.Type;
 export type ListApiKeysResponse = typeof ListApiKeysResponseSchema.Type;
+
+export type DeleteApiKeyRequest = typeof DeleteApiKeyRequestSchema.Type;
+export type DeleteApiKeyResponse = typeof DeleteApiKeyResponseSchema.Type;
 
 export class ApiKeyCreationFailed extends Schema.TaggedError<ApiKeyCreationFailed>()(
   "ApiKeyCreationFailed",

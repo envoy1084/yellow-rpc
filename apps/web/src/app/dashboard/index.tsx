@@ -13,12 +13,12 @@ const DashboardPage = () => {
         <MetricCard
           description="Available Balance for the App Session"
           title="Session Balance"
-          value={`$${appSession?.userBalance ?? 0}`}
+          value={`$${(appSession?.userBalance ?? 0).toFixed(2)}`}
         />
         <MetricCard
           description="Pending Settlement for API usage"
           title="Pending Settlement"
-          value={`$${appSession?.pendingSettlement ?? 0}`}
+          value={`$${(appSession?.pendingSettlement ?? 0).toFixed(2)}`}
         />
         <MetricCard
           description="Total API Keys created"

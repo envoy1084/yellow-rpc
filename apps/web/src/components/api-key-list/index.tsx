@@ -1,3 +1,6 @@
+import { useState } from "react";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   type ColumnDef,
   flexRender,
@@ -5,17 +8,25 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { DotsThreeIcon, PenIcon, TrashIcon } from "@phosphor-icons/react";
-import type { ApiKey } from "@yellow-rpc/schema";
+import { DotsThreeIcon, TrashIcon } from "@phosphor-icons/react";
+import { AddressSchema, type ApiKey } from "@yellow-rpc/schema";
 import { format } from "date-fns";
+import { Effect } from "effect";
+import { useConnection } from "wagmi";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -26,9 +37,100 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { YellowRpcHttpClient } from "@/layers";
+import { queryKeys } from "@/lib/query";
+import { RuntimeClient } from "@/lib/runtime";
 
 import { BaseIcon, EthereumIcon, OptimismIcon } from "../icons";
 import { Badge } from "../ui/badge";
+
+const ActionsCell = ({ row }: { row: ApiKey }) => {
+  const { address } = useConnection();
+  const queryClient = useQueryClient();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const id = row.id;
+      if (!address) {
+        setDeleteOpen(false);
+        return;
+      }
+
+      const walletAddress = AddressSchema.make(address);
+      const program = Effect.gen(function* () {
+        const client = yield* YellowRpcHttpClient;
+
+        const { success } = yield* client.apiKey.delete({
+          payload: { id, walletAddress },
+        });
+
+        return success;
+      });
+
+      const success = await RuntimeClient.runPromise(program);
+
+      if (success) {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            ...queryKeys.apiKeys.list(walletAddress),
+          }),
+          queryClient.invalidateQueries({
+            ...queryKeys.appSession.get(walletAddress),
+          }),
+        ]);
+      }
+
+      setDeleteOpen(false);
+    },
+  });
+
+  return (
+    <>
+      <Dialog onOpenChange={setDeleteOpen} open={deleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your
+              API Key. Proceed with caution.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid-cols-2 gap-2 grid">
+            <Button onClick={() => setDeleteOpen(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => deleteMutation.mutateAsync()}
+              variant="destructive"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={<Button className="h-8 w-8 p-0" variant="ghost" />}
+        >
+          <span className="sr-only">Open menu</span>
+          <DotsThreeIcon className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-full">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={() => setDeleteOpen(true)}
+              variant="destructive"
+            >
+              <TrashIcon />
+              Delete API Key
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+};
 
 export const columns: ColumnDef<ApiKey>[] = [
   {
@@ -101,30 +203,8 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: "Expires",
   },
   {
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button className="h-8 w-8 p-0" variant="ghost" />}
-          >
-            <span className="sr-only">Open menu</span>
-            <DotsThreeIcon className="h-4 w-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-full">
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <PenIcon />
-                Edit API Key
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <TrashIcon />
-                Delete API Key
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+    cell: ({ row }) => {
+      return <ActionsCell row={row.original} />;
     },
     id: "actions",
   },
