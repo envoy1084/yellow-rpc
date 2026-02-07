@@ -1,6 +1,6 @@
 import { RedisCore, type RedisError } from "@envoy1084/effect-redis";
 import { type ApiKey, ApiKeySchema } from "@yellow-rpc/schema";
-import { Context, Effect, Layer, type Option, Schema } from "effect";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 
 export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
   ApiKeyRepository,
@@ -19,7 +19,9 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
       walletAddress: string,
     ) => Effect.Effect<void, RedisError>;
     listApiKeys: (walletAddress: string) => Effect.Effect<ApiKey[], RedisError>;
-    // getApiKeyByHash: () => Effect.Effect<ApiKey[], RedisError>;
+    getApiKeyByHash: (
+      hash: string,
+    ) => Effect.Effect<Option.Option<ApiKey>, RedisError>;
   }
 >() {}
 
@@ -34,9 +36,18 @@ export const ApiKeyRepositoryLive = Layer.effect(
         Effect.gen(function* () {
           const key = `${suffix}:${data.id}`;
           const arrKey = `api_keys:${walletAddress}`;
-          yield* redis.sAdd(arrKey, data.id);
           const encoded = Schema.encodeSync(ApiKeySchema)(data);
-          yield* redis.hSet(key, encoded);
+          const reverseKey = `api_key_reverse:${data.hashedKey}}`;
+          yield* redis.multi((tx) =>
+            Effect.gen(function* () {
+              // Add Api Key
+              yield* tx.hSet(key, encoded);
+              // Add Api Key to List
+              yield* tx.sAdd(arrKey, data.id);
+              // Add Reverse Lookup
+              yield* tx.set(reverseKey, data.id);
+            }),
+          );
         }),
       deleteApiKey: (id, walletAddress) =>
         Effect.gen(function* () {
@@ -50,6 +61,15 @@ export const ApiKeyRepositoryLive = Layer.effect(
           const key = `${suffix}:${id}`;
           const res = yield* redis.hGetAll(key);
           return Schema.decodeUnknownOption(ApiKeySchema)(res);
+        }),
+      getApiKeyByHash: (hash: string) =>
+        Effect.gen(function* () {
+          const reverseKey = `api_key_reverse:${hash}`;
+          const id = yield* redis.get(reverseKey);
+          if (!id) return Option.none();
+          const key = `${suffix}:${id}`;
+          const res = yield* redis.hGetAll(key);
+          return Option.some(Schema.decodeUnknownSync(ApiKeySchema)(res));
         }),
       listApiKeys: (walletAddress) =>
         Effect.gen(function* () {

@@ -17,7 +17,7 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "Lua.diagnostics.globals": ["KEYS"],
+  "Lua.diagnostics.globals": ["KEYS", "redis"],
   "postman.settings.dotenv-detection-notification-visibility": false,
   "tailwindCSS.classAttributes": [
     "class",

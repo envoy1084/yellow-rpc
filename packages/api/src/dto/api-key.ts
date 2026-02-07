@@ -27,3 +27,13 @@ export class ApiKeyCreationFailed extends Schema.TaggedError<ApiKeyCreationFaile
     message: Schema.String,
   },
 ) {}
+
+export class ApiKeyNotFound extends Schema.TaggedError<ApiKeyNotFound>()(
+  "ApiKeyNotFound",
+  {},
+) {}
+
+export class InvalidApiKey extends Schema.TaggedError<InvalidApiKey>()(
+  "InvalidApiKey",
+  {},
+) {}

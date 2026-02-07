@@ -1,13 +1,13 @@
 import { HttpApiEndpoint, HttpApiGroup } from "@effect/platform";
 import { Schema } from "effect";
 
+import { ApiKeyNotFound } from "./dto";
 import {
-  InvalidApiKey,
+  InsufficientBalance,
   JsonRpcRequest,
   JsonRpcResponse,
-  PaymentRequired,
+  PaymentFailed,
   RpcError,
-  Unauthorized,
 } from "./dto/rpc";
 
 export const rpcGroup = HttpApiGroup.make("rpc").add(
@@ -19,8 +19,8 @@ export const rpcGroup = HttpApiGroup.make("rpc").add(
     )
     .setPayload(JsonRpcRequest)
     .addSuccess(JsonRpcResponse)
-    .addError(Unauthorized, { status: 401 })
-    .addError(PaymentRequired, { status: 402 })
+    .addError(ApiKeyNotFound, { status: 404 })
     .addError(RpcError, { status: 500 })
-    .addError(InvalidApiKey, { status: 400 }),
+    .addError(InsufficientBalance, { status: 402 })
+    .addError(PaymentFailed, { status: 400 }),
 );

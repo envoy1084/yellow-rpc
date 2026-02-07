@@ -14,18 +14,13 @@ export const JsonRpcResponse = Schema.Struct({
   result: Schema.optional(Schema.Unknown),
 });
 
-export class InvalidApiKey extends Schema.TaggedError<InvalidApiKey>()(
-  "InvalidApiKey",
+export class PaymentFailed extends Schema.TaggedError<PaymentFailed>()(
+  "PaymentFailed",
   {},
 ) {}
 
-export class Unauthorized extends Schema.TaggedError<Unauthorized>()(
-  "Unauthorized",
-  {},
-) {}
-
-export class PaymentRequired extends Schema.TaggedError<PaymentRequired>()(
-  "PaymentRequired",
+export class InsufficientBalance extends Schema.TaggedError<InsufficientBalance>()(
+  "InsufficientBalance",
   {},
 ) {}
 

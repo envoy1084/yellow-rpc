@@ -11,6 +11,7 @@ import {
   type GetAppDefinitionResponse,
   type MessageSigner,
   type RPCData,
+  RPCMethod,
   type SubmitAppStateRequestParamsV04,
   type SubmitAppStateResponse,
 } from "@erc7824/nitrolite";
@@ -57,9 +58,13 @@ export const submitAppState = async (
 
   msgJson.sig.push(...participantSigs);
 
-  return (await client.sendMessage(JSON.stringify(msgJson))) as
+  const res = (await client.sendMessage(JSON.stringify(msgJson))) as
     | SubmitAppStateResponse
     | ErrorResponse;
+
+  if (res.method === RPCMethod.Error) throw new Error(res.params.error);
+
+  return res;
 };
 
 export const closeAppSession = async (
@@ -78,15 +83,23 @@ export const closeAppSession = async (
 
   msgJson.sig.push(...participantSigs);
 
-  return (await client.sendMessage(JSON.stringify(msgJson))) as
+  const res = (await client.sendMessage(JSON.stringify(msgJson))) as
     | CloseAppSessionResponse
     | ErrorResponse;
+
+  if (res.method === RPCMethod.Error) throw new Error(res.params.error);
+
+  return res;
 };
 
 export const getAppSession = async (appSessionId: Hex, client: Client) => {
   const msg = createGetAppDefinitionMessageV2(appSessionId);
 
-  return (await client.sendMessage(msg)) as
+  const res = (await client.sendMessage(msg)) as
     | GetAppDefinitionResponse
     | ErrorResponse;
+
+  if (res.method === RPCMethod.Error) throw new Error(res.params.error);
+
+  return res;
 };
