@@ -5,7 +5,7 @@ import {
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import { generateSession } from "@yellow-rpc/rpc";
 import { AddressSchema, HexSchema } from "@yellow-rpc/schema";
-import { Duration, Effect } from "effect";
+import { Duration, Effect, Option } from "effect";
 
 import { Admin, Encryption } from "@/layers";
 
@@ -16,6 +16,41 @@ export const prepareAppSessionHandler = (
     const admin = yield* Admin;
     const encryption = yield* Encryption;
     const appSessionRepo = yield* AppSessionRepository;
+
+    // Check if App Session already exists
+    const existingAppSessionRes = yield* appSessionRepo
+      .getAppSession(data.walletAddress)
+      .pipe(
+        Effect.catchTag("RedisError", (e) =>
+          Effect.fail(
+            new AppSessionCreationFailed({
+              message: e.message,
+            }),
+          ),
+        ),
+      );
+
+    if (Option.isSome(existingAppSessionRes)) {
+      const existingAppSession = existingAppSessionRes.value;
+      const expiresAt = Math.floor(
+        new Date(Date.now() + Duration.toMillis(Duration.days(356))).getTime() /
+          1000,
+      );
+
+      const authParams = JSON.stringify({
+        address: data.walletAddress as `0x${string}`,
+        allowances: [],
+        application: `yellow-rpc-${existingAppSession.id}`,
+        expires_at: expiresAt,
+        scope: "yellow-rpc.com",
+        session_key: existingAppSession.userSessionKey,
+      });
+
+      return {
+        authParams,
+        id: existingAppSession.id,
+      };
+    }
 
     const userSession = generateSession();
     const encUserSessionPrivateKey = yield* encryption.encrypt(
@@ -77,13 +112,7 @@ export const prepareAppSessionHandler = (
     );
     const authParams = JSON.stringify({
       address: data.walletAddress as `0x${string}`,
-      allowances: [
-        {
-          amount: "10",
-          asset: "ytest.usd",
-          participant: data.walletAddress,
-        },
-      ],
+      allowances: [],
       application: `yellow-rpc-${id}`,
       expires_at: expiresAt,
       scope: "yellow-rpc.com",

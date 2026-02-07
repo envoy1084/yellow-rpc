@@ -6,14 +6,15 @@ import {
   AppSessionCreationFailed,
   AppSessionNotFound,
   AppSessionUpdateFailed,
-  ConfirmDepositFundsRequestSchema,
-  ConfirmDepositFundsResponseSchema,
+  DepositFundsRequestSchema,
+  DepositFundsResponseSchema,
   GetAppSessionRequestSchema,
   GetAppSessionResponseSchema,
+  InsufficientAvailableBalance,
   PrepareCreateAppSessionResponseSchema,
   PrepareCreateAppSessionSchema,
-  PrepareDepositFundsRequestSchema,
-  PrepareDepositFundsResponseSchema,
+  WithdrawFundsRequestSchema,
+  WithdrawFundsResponseSchema,
 } from "./dto";
 
 export const sessionGroup = HttpApiGroup.make("session")
@@ -29,16 +30,17 @@ export const sessionGroup = HttpApiGroup.make("session")
       .addError(AppSessionCreationFailed, { status: 500 }),
   )
   .add(
-    HttpApiEndpoint.post("prepareDeposit", "/session/prepare-deposit")
-      .setPayload(PrepareDepositFundsRequestSchema)
-      .addSuccess(PrepareDepositFundsResponseSchema)
+    HttpApiEndpoint.post("deposit", "/session/deposit")
+      .setPayload(DepositFundsRequestSchema)
+      .addSuccess(DepositFundsResponseSchema)
       .addError(AppSessionUpdateFailed, { status: 500 })
       .addError(AppSessionNotFound, { status: 404 }),
   )
   .add(
-    HttpApiEndpoint.post("confirmDeposit", "/session/confirm-deposit")
-      .setPayload(ConfirmDepositFundsRequestSchema)
-      .addSuccess(ConfirmDepositFundsResponseSchema)
+    HttpApiEndpoint.post("withdraw", "/session/withdraw")
+      .setPayload(WithdrawFundsRequestSchema)
+      .addSuccess(WithdrawFundsResponseSchema)
+      .addError(InsufficientAvailableBalance, { status: 400 })
       .addError(AppSessionUpdateFailed, { status: 500 })
       .addError(AppSessionNotFound, { status: 404 }),
   )

@@ -1,4 +1,4 @@
-import { AddressSchema, AppSessionSchema } from "@yellow-rpc/schema";
+import { AddressSchema, AppSessionSchema, HexSchema } from "@yellow-rpc/schema";
 import { Schema } from "effect";
 
 export const PrepareCreateAppSessionSchema = Schema.Struct({
@@ -28,21 +28,23 @@ export const GetAppSessionResponseSchema = Schema.Struct({
   session: Schema.Union(Schema.Null, AppSessionSchema),
 });
 
-export const PrepareDepositFundsRequestSchema = Schema.Struct({
+export const DepositFundsRequestSchema = Schema.Struct({
+  amount: Schema.NumberFromString,
+  sessionKey: AddressSchema,
+  sessionPrivateKey: HexSchema,
+  walletAddress: AddressSchema,
+});
+
+export const DepositFundsResponseSchema = Schema.Struct({
+  success: Schema.Boolean,
+});
+
+export const WithdrawFundsRequestSchema = Schema.Struct({
   amount: Schema.NumberFromString,
   walletAddress: AddressSchema,
 });
 
-export const PrepareDepositFundsResponseSchema = Schema.Struct({
-  depositMessage: Schema.String,
-});
-
-export const ConfirmDepositFundsRequestSchema = Schema.Struct({
-  signedDepositMessage: Schema.String,
-  walletAddress: AddressSchema,
-});
-
-export const ConfirmDepositFundsResponseSchema = Schema.Struct({
+export const WithdrawFundsResponseSchema = Schema.Struct({
   success: Schema.Boolean,
 });
 
@@ -59,15 +61,11 @@ export type ActivateAppSessionResponse =
 export type GetAppSessionRequest = typeof GetAppSessionRequestSchema.Type;
 export type GetAppSessionResponse = typeof GetAppSessionResponseSchema.Type;
 
-export type PrepareDepositFundsRequest =
-  typeof PrepareDepositFundsRequestSchema.Type;
-export type PrepareDepositFundsResponse =
-  typeof PrepareDepositFundsResponseSchema.Type;
+export type DepositFundsRequest = typeof DepositFundsRequestSchema.Type;
+export type DepositFundsResponse = typeof DepositFundsResponseSchema.Type;
 
-export type ConfirmDepositFundsRequest =
-  typeof ConfirmDepositFundsRequestSchema.Type;
-export type ConfirmDepositFundsResponse =
-  typeof ConfirmDepositFundsResponseSchema.Type;
+export type WithdrawFundsRequest = typeof WithdrawFundsRequestSchema.Type;
+export type WithdrawFundsResponse = typeof WithdrawFundsResponseSchema.Type;
 
 export class AppSessionNotFound extends Schema.TaggedError<AppSessionNotFound>()(
   "AppSessionNotFound",
@@ -83,6 +81,13 @@ export class AppSessionCreationFailed extends Schema.TaggedError<AppSessionCreat
 
 export class AppSessionUpdateFailed extends Schema.TaggedError<AppSessionUpdateFailed>()(
   "AppSessionUpdateFailed",
+  {
+    message: Schema.String,
+  },
+) {}
+
+export class InsufficientAvailableBalance extends Schema.TaggedError<InsufficientAvailableBalance>()(
+  "InsufficientAvailableBalance",
   {
     message: Schema.String,
   },

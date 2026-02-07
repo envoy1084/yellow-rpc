@@ -2,9 +2,8 @@ import { useMemo } from "react";
 
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CopyButton } from "@/components";
+import { CopyButton, DepositButton, WithdrawButton } from "@/components";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAppSession } from "@/hooks";
 
@@ -65,8 +64,8 @@ export const BillingPage = () => {
           </div>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <Button variant="outline">Deposit Funds</Button>
-          <Button variant="outline">Withdraw Funds</Button>
+          <DepositButton />
+          <WithdrawButton />
         </div>
       </div>
     </div>
