@@ -53,8 +53,17 @@ export const ApiKeyRepositoryLive = Layer.effect(
         Effect.gen(function* () {
           const key = `${suffix}:${id}`;
           const arrKey = `api_keys:${walletAddress}`;
-          yield* redis.sRem(arrKey, id);
-          yield* redis.del(key);
+
+          yield* redis.pipeline((tx) =>
+            Effect.gen(function* () {
+              // Remove Api Key
+              yield* tx.del(key);
+              // Remove Api Key from List
+              yield* tx.sRem(arrKey, id);
+              // Remove Reverse Lookup
+              yield* tx.del(`api_key_reverse:${id}`);
+            }),
+          );
         }),
       getApiKey: (id) =>
         Effect.gen(function* () {

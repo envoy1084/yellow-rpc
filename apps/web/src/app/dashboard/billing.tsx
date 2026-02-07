@@ -2,6 +2,8 @@ import { useMemo } from "react";
 
 import { createFileRoute } from "@tanstack/react-router";
 
+import { WarningIcon } from "@phosphor-icons/react";
+
 import { CopyButton, DepositButton, WithdrawButton } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -48,6 +50,19 @@ export const BillingPage = () => {
         </div>
         <Progress value={Number(consumed.percentage)} />
       </div>
+      {appSession?.status === "invalid" && (
+        <div className="bg-primary/15 w-full p-3 rounded-md border border-primary/20 text-primary flex flex-col gap-2">
+          <div className="flex flex-row items-center gap-2">
+            <WarningIcon />
+            <span className="text-sm">Warning</span>
+          </div>
+          <p className="text-xs">
+            App Session Key is invalid, this can happen due multiple reasons
+            such as creating a new session key, or session key expiry. Please
+            deposit any number of funds to renew your session key.
+          </p>
+        </div>
+      )}
       <div className="border-t w-full" />
       <div className="flex flex-col gap-2">
         <div className="text-xl font-medium">Session Information</div>

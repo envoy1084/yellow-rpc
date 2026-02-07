@@ -29,6 +29,7 @@ export class Settlement extends Context.Tag("Settlement")<
 export const settleAppSession = (walletAddress: Address) =>
   Effect.gen(function* () {
     const admin = yield* Admin;
+
     yield* updateAppSessionState(walletAddress, {
       createNewAllocations: (appSession) => {
         if (appSession.pendingSettlement === 0) return null;
@@ -79,15 +80,11 @@ export const SettlementLive = Layer.effect(
         // -- 2: Needs Settlement
         const [statusCode, walletAddress] = res as [number, `0x${string}`];
 
-        yield* Effect.log("Settlement Status: ", statusCode);
-        yield* Effect.log("Settlement Wallet Address: ", walletAddress);
-
         if (statusCode === -1) return yield* Effect.fail(new ApiKeyNotFound());
         if (statusCode === -2) return yield* Effect.fail(new PaymentFailed());
         if (statusCode === -3)
           return yield* Effect.fail(new InsufficientBalance());
         if (statusCode === 2) {
-          yield* Effect.log("Enqueuing App Session: ", walletAddress);
           yield* queue.enqueue(AddressSchema.make(walletAddress));
         }
       });

@@ -55,15 +55,14 @@ export const updateAppSessionState = (
     const adminSigner = createECDSAMessageSigner(adminPrivateKey as Hex);
 
     const newAllocations = props.createNewAllocations(appSession);
-    if (newAllocations === null) return;
+    if (newAllocations === null) return void 0;
 
-    yield* Effect.log("Starting App Session Update");
     const updateRes = yield* Effect.tryPromise({
       catch: (e) =>
         new AppSessionUpdateFailed({ message: (e as Error).message }),
       try: async () => {
         await admin.client.authenticateWithJwt(adminJwt);
-        return await admin.client.submitAppState(
+        const response = await admin.client.submitAppState(
           adminSigner,
           [userSessionSigner],
           {
@@ -73,17 +72,41 @@ export const updateAppSessionState = (
             version: appSession.version + 1,
           },
         );
-      },
-    });
 
-    yield* Effect.log("App Session Updated", updateRes);
+        return { response, success: true };
+      },
+    }).pipe(
+      Effect.catchAll(() =>
+        Effect.succeed({
+          response: null,
+          success: false,
+        } as const),
+      ),
+    );
+
+    if (!updateRes.success) {
+      // App Settlement fails due to following reasons:
+      // - User Created a new Session key, and invalidate the one in Database
+      // - User Session Key is expired (not likely as we do 1 year expiry)
+      // - Admin Session Key is expired (not likely as we do 1 year expiry)
+      // in all cases we mark the AppSession as invalid
+      yield* Effect.logWarning(
+        "App Session Settlement Failed, marking as invalid",
+      );
+      yield* appSessionRepo
+        .updateAppSession(walletAddress, {
+          status: "invalid",
+        })
+        .pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+      return;
+    }
 
     // Update AppSession
     yield* appSessionRepo
       .updateAppSession(appSession.ownerAddress, {
         pendingSettlement: 0,
-        status: updateRes.params.status,
-        version: updateRes.params.version,
+        status: updateRes.response.params.status,
+        version: updateRes.response.params.version,
       })
       .pipe(
         Effect.catchTag("RedisError", (e) =>

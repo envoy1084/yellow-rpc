@@ -25,6 +25,7 @@ export const AppSessionSchema = Schema.Struct({
     "challenged",
     "resizing",
     "inactive",
+    "invalid",
   ),
   // App Session Version to track updates
   version: Schema.NumberFromString,

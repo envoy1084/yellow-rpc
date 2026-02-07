@@ -37,25 +37,6 @@ export const AdminLive = Layer.scoped(
 
       const address = account.address;
 
-      // Start Authentication
-      // const session = yield* Effect.promise(async () => {
-      //   await client.connect();
-      //   const session = await client.authenticate(walletClient, {
-      //     allowances: [],
-      //     application: "YellowRPC",
-      //     expiresAt: new Date(
-      //       Date.now() + Duration.toMillis(Duration.days(365)),
-      //     ), // 1 Year
-      //     scope: "yellow-rpc.com",
-      //   });
-
-      //   return session;
-      // });
-      // yield* Effect.log(
-      //   "Admin Authenticated Successfully, Session: ",
-      //   session.address,
-      // );
-
       return { address, client, walletClient };
     }),
     ({ client }) => Effect.promise(() => client.disconnect()),
