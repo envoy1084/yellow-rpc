@@ -14,7 +14,7 @@ import {
   PaymentFailed,
 } from "@yellow-rpc/api";
 import { AppSessionRepository } from "@yellow-rpc/domain/session";
-import type { Hex } from "@yellow-rpc/schema";
+import { type Address, AddressSchema, type Hex } from "@yellow-rpc/schema";
 import { Context, Effect, Layer, Option } from "effect";
 
 import { chargeScript } from "@/helpers";
@@ -22,6 +22,7 @@ import { chargeScript } from "@/helpers";
 import { Admin } from "./admin";
 import { Encryption } from "./encrypt";
 import { Hasher } from "./hash";
+import { SettlementQueue } from "./settle-queue";
 
 export class Settlement extends Context.Tag("Settlement")<
   Settlement,
@@ -32,24 +33,83 @@ export class Settlement extends Context.Tag("Settlement")<
       undefined,
       ApiKeyNotFound | PaymentFailed | InsufficientBalance
     >;
-    settleAppSession: (
-      walletAddress: Hex,
-    ) => Effect.Effect<
-      undefined,
-      AppSessionNotFound | AppSessionUpdateFailed,
-      never
-    >;
   }
 >() {}
+
+export const settleAppSession = (walletAddress: Address) =>
+  Effect.gen(function* () {
+    const admin = yield* Admin;
+    const appSessionRepo = yield* AppSessionRepository;
+    const encryption = yield* Encryption;
+
+    // Step 1: Get AppSession
+    const appSessionRes = yield* appSessionRepo
+      .getAppSession(walletAddress)
+      .pipe(
+        Effect.catchTag("RedisError", () =>
+          Effect.fail(new AppSessionNotFound()),
+        ),
+      );
+
+    if (Option.isNone(appSessionRes)) {
+      return yield* Effect.fail(new AppSessionNotFound());
+    }
+
+    const appSession = appSessionRes.value;
+
+    // Step 2: Update AppSession
+    const userSessionPrivateKey = yield* encryption.decrypt(
+      appSession.userEncSessionPrivateKey,
+    );
+    const userSessionSigner = createECDSAMessageSigner(
+      userSessionPrivateKey as Hex,
+    );
+
+    const updateRes = yield* Effect.promise(async () => {
+      return await admin.client.submitAppState(
+        admin.session.signer,
+        [userSessionSigner],
+        {
+          allocations: [
+            {
+              amount: appSession.adminBalance.toString(),
+              asset: appSession.asset,
+              participant: admin.address,
+            },
+            {
+              amount: appSession.userBalance.toString(),
+              asset: appSession.asset,
+              participant: walletAddress,
+            },
+          ],
+          app_session_id: appSession.appSessionId,
+          intent: RPCAppStateIntent.Operate,
+          version: appSession.version + 1,
+        },
+      );
+    });
+
+    // Update AppSession
+    yield* appSessionRepo
+      .updateAppSession(appSession.ownerAddress, {
+        pendingSettlement: 0,
+        status: updateRes.params.status,
+        version: updateRes.params.version,
+      })
+      .pipe(
+        Effect.catchTag("RedisError", (e) =>
+          Effect.fail(new AppSessionUpdateFailed({ message: e.message })),
+        ),
+      );
+  });
 
 export const SettlementLive = Layer.effect(
   Settlement,
   Effect.gen(function* () {
     const hasher = yield* Hasher;
     const redis = yield* RedisCore;
-    const admin = yield* Admin;
-    const appSessionRepo = yield* AppSessionRepository;
-    const encryption = yield* Encryption;
+
+    const queue = yield* SettlementQueue;
 
     const chargeApiKey = (apiKey: string) =>
       Effect.gen(function* () {
@@ -78,76 +138,12 @@ export const SettlementLive = Layer.effect(
         if (statusCode === -3)
           return yield* Effect.fail(new InsufficientBalance());
         if (statusCode === 2) {
-          // TODO: Settle App Session (add to queue)
+          yield* queue.enqueue(AddressSchema.make(walletAddress));
         }
-      });
-
-    const settleAppSession = (walletAddress: Hex) =>
-      Effect.gen(function* () {
-        // Step 1: Get AppSession
-        const appSessionRes = yield* appSessionRepo
-          .getAppSession(walletAddress)
-          .pipe(
-            Effect.catchTag("RedisError", () =>
-              Effect.fail(new AppSessionNotFound()),
-            ),
-          );
-
-        if (Option.isNone(appSessionRes)) {
-          return yield* Effect.fail(new AppSessionNotFound());
-        }
-
-        const appSession = appSessionRes.value;
-
-        // Step 2: Update AppSession
-        const userSessionPrivateKey = yield* encryption.decrypt(
-          appSession.userEncSessionPrivateKey,
-        );
-        const userSessionSigner = createECDSAMessageSigner(
-          userSessionPrivateKey as Hex,
-        );
-
-        const updateRes = yield* Effect.promise(async () => {
-          return await admin.client.submitAppState(
-            admin.session.signer,
-            [userSessionSigner],
-            {
-              allocations: [
-                {
-                  amount: appSession.adminBalance.toString(),
-                  asset: appSession.asset,
-                  participant: admin.address,
-                },
-                {
-                  amount: appSession.userBalance.toString(),
-                  asset: appSession.asset,
-                  participant: walletAddress,
-                },
-              ],
-              app_session_id: appSession.appSessionId,
-              intent: RPCAppStateIntent.Operate,
-              version: appSession.version + 1,
-            },
-          );
-        });
-
-        // Update AppSession
-        yield* appSessionRepo
-          .updateAppSession(appSession.ownerAddress, {
-            pendingSettlement: 0,
-            status: updateRes.params.status,
-            version: updateRes.params.version,
-          })
-          .pipe(
-            Effect.catchTag("RedisError", (e) =>
-              Effect.fail(new AppSessionUpdateFailed({ message: e.message })),
-            ),
-          );
       });
 
     return Settlement.of({
       chargeApiKey,
-      settleAppSession,
     });
   }),
 );

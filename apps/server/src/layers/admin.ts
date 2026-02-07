@@ -45,13 +45,17 @@ export const AdminLive = Layer.scoped(
           allowances: [],
           application: "YellowRPC",
           expiresAt: new Date(
-            Date.now() + Duration.toMillis(Duration.days(356)),
+            Date.now() + Duration.toMillis(Duration.days(365)),
           ), // 1 Year
           scope: "yellow-rpc.com",
         });
 
         return session;
       });
+      yield* Effect.log(
+        "Admin Authenticated Successfully, Session: ",
+        session.address,
+      );
 
       return { address, client, session, walletClient };
     }),

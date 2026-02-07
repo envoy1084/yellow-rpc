@@ -23,6 +23,7 @@ import {
   HasherLive,
   KeyGeneratorLive,
   SettlementLive,
+  SettlementQueueLive,
 } from "./layers";
 import { Middlewares } from "./middlewares";
 import { SessionLive } from "./routes/session";
@@ -33,14 +34,16 @@ const YellowRpcApiLive = HttpApiBuilder.api(api).pipe(
   Layer.provideMerge(ApiKeyLive),
   Layer.provideMerge(RpcLive),
   Layer.provideMerge(SessionLive),
+  // Settlement
+  Layer.provideMerge(SettlementLive),
+  Layer.provideMerge(SettlementQueueLive),
   // Layers
   Layer.provideMerge(EncryptionLive),
   Layer.provideMerge(HasherLive),
   Layer.provideMerge(KeyGeneratorLive),
   // Clients
   Layer.provideMerge(FetchHttpClient.layer),
-  // Background Workers
-  Layer.provideMerge(SettlementLive),
+  // Admin
   Layer.provideMerge(AdminLive),
   // Repositories
   Layer.provideMerge(ApiKeyRepositoryLive),
