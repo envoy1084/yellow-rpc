@@ -12,7 +12,9 @@ import { Admin, Encryption } from "@/layers";
 
 type UpdateAppSessionStateProps = {
   intent: RPCAppStateIntent;
-  createNewAllocations: (appSession: AppSession) => RPCAppSessionAllocation[];
+  createNewAllocations: (
+    appSession: AppSession,
+  ) => RPCAppSessionAllocation[] | null;
 };
 
 export const updateAppSessionState = (
@@ -53,6 +55,7 @@ export const updateAppSessionState = (
     const adminSigner = createECDSAMessageSigner(adminPrivateKey as Hex);
 
     const newAllocations = props.createNewAllocations(appSession);
+    if (newAllocations === null) return;
 
     yield* Effect.log("Starting App Session Update");
     const updateRes = yield* Effect.tryPromise({

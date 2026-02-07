@@ -88,10 +88,12 @@ export const activateAppSessionHandler = (data: ActivateAppSessionRequest) =>
       },
     });
 
+    const appSessionId = HexSchema.make(sessionParams.appSessionId);
+
     // Update AppSession
     yield* appSessionRepo
       .updateAppSession(data.walletAddress, {
-        appSessionId: HexSchema.make(sessionParams.appSessionId),
+        appSessionId,
         status: sessionParams.status,
         version: sessionParams.version,
       })
@@ -102,6 +104,6 @@ export const activateAppSessionHandler = (data: ActivateAppSessionRequest) =>
       );
 
     return {
-      appSessionId: "",
+      appSessionId,
     };
   });

@@ -30,18 +30,21 @@ export const settleAppSession = (walletAddress: Address) =>
   Effect.gen(function* () {
     const admin = yield* Admin;
     yield* updateAppSessionState(walletAddress, {
-      createNewAllocations: (appSession) => [
-        {
-          amount: appSession.adminBalance.toString(),
-          asset: appSession.asset,
-          participant: admin.address,
-        },
-        {
-          amount: appSession.userBalance.toString(),
-          asset: appSession.asset,
-          participant: appSession.ownerAddress,
-        },
-      ],
+      createNewAllocations: (appSession) => {
+        if (appSession.pendingSettlement === 0) return null;
+        return [
+          {
+            amount: appSession.adminBalance.toString(),
+            asset: appSession.asset,
+            participant: admin.address,
+          },
+          {
+            amount: appSession.userBalance.toString(),
+            asset: appSession.asset,
+            participant: appSession.ownerAddress,
+          },
+        ];
+      },
       intent: RPCAppStateIntent.Operate,
     });
   });

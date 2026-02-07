@@ -28,6 +28,24 @@ export const GetAppSessionResponseSchema = Schema.Struct({
   session: Schema.Union(Schema.Null, AppSessionSchema),
 });
 
+export const PrepareDepositFundsRequestSchema = Schema.Struct({
+  amount: Schema.NumberFromString,
+  walletAddress: AddressSchema,
+});
+
+export const PrepareDepositFundsResponseSchema = Schema.Struct({
+  depositMessage: Schema.String,
+});
+
+export const ConfirmDepositFundsRequestSchema = Schema.Struct({
+  signedDepositMessage: Schema.String,
+  walletAddress: AddressSchema,
+});
+
+export const ConfirmDepositFundsResponseSchema = Schema.Struct({
+  success: Schema.Boolean,
+});
+
 export type PrepareCreateAppSessionRequest =
   typeof PrepareCreateAppSessionSchema.Type;
 export type PrepareCreateAppSessionResponse =
@@ -40,6 +58,16 @@ export type ActivateAppSessionResponse =
 
 export type GetAppSessionRequest = typeof GetAppSessionRequestSchema.Type;
 export type GetAppSessionResponse = typeof GetAppSessionResponseSchema.Type;
+
+export type PrepareDepositFundsRequest =
+  typeof PrepareDepositFundsRequestSchema.Type;
+export type PrepareDepositFundsResponse =
+  typeof PrepareDepositFundsResponseSchema.Type;
+
+export type ConfirmDepositFundsRequest =
+  typeof ConfirmDepositFundsRequestSchema.Type;
+export type ConfirmDepositFundsResponse =
+  typeof ConfirmDepositFundsResponseSchema.Type;
 
 export class AppSessionNotFound extends Schema.TaggedError<AppSessionNotFound>()(
   "AppSessionNotFound",
