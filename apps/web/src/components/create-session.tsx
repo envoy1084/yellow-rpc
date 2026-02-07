@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { AddressSchema } from "@yellow-rpc/schema";
 import { Effect } from "effect";
@@ -28,34 +28,36 @@ export const CreateSession = () => {
   const appSession = useAppSession();
   const queryClient = useQueryClient();
 
-  const createAppSession = async () => {
-    if (!address) return;
-    if (!walletClient) return;
-    const walletAddress = AddressSchema.make(address);
-    const program = Effect.gen(function* () {
-      const client = yield* YellowRpcHttpClient;
-      const { id, authParams } = yield* client.session.prepare({
-        payload: {
-          walletAddress,
-        },
+  const createAppSessionMutation = useMutation({
+    mutationFn: async () => {
+      if (!address) return;
+      if (!walletClient) return;
+      const walletAddress = AddressSchema.make(address);
+      const program = Effect.gen(function* () {
+        const client = yield* YellowRpcHttpClient;
+        const { id, authParams } = yield* client.session.prepare({
+          payload: {
+            walletAddress,
+          },
+        });
+
+        yield* Effect.promise(async () => {
+          await ws.authenticateWithParams(walletClient, authParams);
+        });
+
+        const { appSessionId } = yield* client.session.activate({
+          payload: { id, signature: "", walletAddress },
+        });
+
+        return appSessionId;
       });
 
-      yield* Effect.promise(async () => {
-        await ws.authenticateWithParams(walletClient, authParams);
+      await RuntimeClient.runPromise(program);
+      await queryClient.invalidateQueries({
+        ...queryKeys.appSession.get(walletAddress),
       });
-
-      const { appSessionId } = yield* client.session.activate({
-        payload: { id, signature: "", walletAddress },
-      });
-
-      return appSessionId;
-    });
-
-    await RuntimeClient.runPromise(program);
-    await queryClient.invalidateQueries({
-      ...queryKeys.appSession.get(walletAddress),
-    });
-  };
+    },
+  });
 
   return (
     <QueryBoundary checkIsEmpty={() => false} query={appSession}>
@@ -82,7 +84,10 @@ export const CreateSession = () => {
                           Create a new app session to start using YellowRPC. You
                           can deposit and withdraw funds from your app session.
                         </DialogDescription>
-                        <Button onClick={createAppSession}>
+                        <Button
+                          disabled={createAppSessionMutation.isPending}
+                          onClick={() => createAppSessionMutation.mutateAsync()}
+                        >
                           Create App Session
                         </Button>
                       </DialogHeader>

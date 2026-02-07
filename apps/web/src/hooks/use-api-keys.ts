@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: <safe> */
 import { useQuery } from "@tanstack/react-query";
 
 import { AddressSchema } from "@yellow-rpc/schema";
@@ -23,7 +24,6 @@ export const useApiKeys = () => {
       });
 
       const apiKeys = await RuntimeClient.runPromise(program);
-      console.log("API Keys: ", apiKeys);
       return apiKeys;
     },
     ...queryKeys.apiKeys.list(address),

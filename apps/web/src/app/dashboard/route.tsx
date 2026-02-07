@@ -3,10 +3,12 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { AppSidebar, DashboardNavbar } from "@/components";
 import { CreateSession } from "@/components/create-session";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useYellow } from "@/hooks";
+import { useUnifiedBalance, useYellow, useYellowEvents } from "@/hooks";
 
 const DashboardLayout = () => {
   useYellow();
+  useYellowEvents();
+  useUnifiedBalance();
   return (
     <SidebarProvider>
       <AppSidebar />

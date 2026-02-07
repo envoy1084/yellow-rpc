@@ -90,7 +90,7 @@ export const prepareAppSessionHandler = (
         pendingSettlement: 0,
         status: "inactive",
         updatedAt: new Date(),
-        userBalance: 10,
+        userBalance: 0,
         userEncSessionPrivateKey: encUserSessionPrivateKey,
         userSessionKey: AddressSchema.make(userSession.address),
         version: 0,

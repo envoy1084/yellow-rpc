@@ -1,11 +1,7 @@
 /** biome-ignore-all lint/complexity/noExcessiveLinesPerFunction: safe */
 import { useState } from "react";
 
-// import { useQueryClient } from "@tanstack/react-query";
-
-// import { useQueryClient } from "@tanstack/react-query";
-
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { effectTsResolver } from "@hookform/resolvers/effect-ts";
 import {
@@ -24,6 +20,7 @@ import { format } from "date-fns";
 import { Effect } from "effect";
 // import { Effect } from "effect";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useConnection, useWalletClient } from "wagmi";
 
 import { BaseIcon, EthereumIcon, OptimismIcon } from "@/components/icons";
@@ -101,27 +98,43 @@ export const CreateApiKeyForm = () => {
     }, 2000);
   };
 
-  const onSubmit = async (data: CreateApiKeyRequest) => {
-    if (!address) return;
-    if (!walletClient) return;
-    const walletAddress = AddressSchema.make(address);
-    const program = Effect.gen(function* () {
-      const client = yield* YellowRpcHttpClient;
-      const { apiKey } = yield* client.apiKey.create({
-        payload: data,
-      });
-      return apiKey;
-    });
+  const createApiKeyMutation = useMutation({
+    mutationFn: async (data: CreateApiKeyRequest) => {
+      if (!address) return;
+      if (!walletClient) return;
+      const walletAddress = AddressSchema.make(address);
 
-    const apiKey = await RuntimeClient.runPromise(program);
-    setApiKey(apiKey);
-    await queryClient.invalidateQueries({
-      ...queryKeys.apiKeys.list(walletAddress),
-    });
+      const program = Effect.gen(function* () {
+        const client = yield* YellowRpcHttpClient;
+        const { apiKey } = yield* client.apiKey.create({
+          payload: data,
+        });
+        return apiKey;
+      });
+
+      await toast.promise(RuntimeClient.runPromise(program), {
+        error: "Failed to Create Api Key",
+        finally: async () => {
+          await queryClient.invalidateQueries({
+            ...queryKeys.apiKeys.list(walletAddress),
+          });
+        },
+        loading: "Creating Api Key...",
+        success: (apiKey) => {
+          setApiKey(apiKey);
+          return "Successfully Created Api Key";
+        },
+      });
+    },
+  });
+
+  const onSubmit = async (data: CreateApiKeyRequest) => {
+    await createApiKeyMutation.mutateAsync(data);
   };
 
   return (
     <form
+      aria-disabled={createApiKeyMutation.isPending}
       className="space-y-3"
       id="create-api-key"
       onSubmit={form.handleSubmit(onSubmit)}
@@ -160,6 +173,7 @@ export const CreateApiKeyForm = () => {
                 {...field}
                 aria-invalid={fieldState.invalid}
                 autoComplete="off"
+                disabled={createApiKeyMutation.isPending}
                 id="create-api-key-label"
                 placeholder="Your API Key Label"
               />
@@ -176,9 +190,9 @@ export const CreateApiKeyForm = () => {
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="create-api-key-chain">Chain</FieldLabel>
               <Select
+                disabled={createApiKeyMutation.isPending}
                 items={chains}
                 onValueChange={(value) => {
-                  console.log(value);
                   field.onChange(value?.value);
                 }}
                 value={chains.find((c) => c.value === field.value)}
@@ -240,6 +254,7 @@ export const CreateApiKeyForm = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
+                    disabled={createApiKeyMutation.isPending}
                     hidden={{
                       before: new Date(),
                     }}
@@ -254,7 +269,11 @@ export const CreateApiKeyForm = () => {
           )}
         />
       </FieldGroup>
-      <Button className="w-full" type="submit">
+      <Button
+        className="w-full"
+        disabled={createApiKeyMutation.isPending}
+        type="submit"
+      >
         Create API Key
       </Button>
     </form>

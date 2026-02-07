@@ -15,7 +15,6 @@ export const YellowRpcHttpClientLive = Layer.effect(
   YellowRpcHttpClient,
   Effect.gen(function* () {
     const baseUrl = yield* Config.string("VITE_YELLOW_RPC_BASE_URL");
-    console.log("Base URL: ", baseUrl);
     const client = yield* make(baseUrl);
     return YellowRpcHttpClient.of(client);
   }),

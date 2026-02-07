@@ -14,13 +14,9 @@ export const useYellow = () => {
 
   useEffect(() => {
     const ws = clientRef.current!;
-    console.log("Connecting...");
-    ws.connect()
-      .then(() => console.log("Connected"))
-      .catch(console.error);
+    ws.connect().catch(console.error);
 
     return () => {
-      console.log("Disconnecting...");
       ws.disconnect();
     };
   }, []);

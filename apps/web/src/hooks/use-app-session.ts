@@ -14,6 +14,7 @@ export const useAppSession = () => {
   const appSession = useQuery({
     enabled: Boolean(address),
     queryFn: async () => {
+      // biome-ignore lint/style/noNonNullAssertion: safe
       const walletAddress = AddressSchema.make(address!);
       const program = Effect.gen(function* () {
         const client = yield* YellowRpcHttpClient;

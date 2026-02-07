@@ -13,11 +13,13 @@ export const useAuthenticate = () => {
   const setSession = useAtomSet(sessionAtom);
 
   const getSigner = async () => {
-    if (!session) {
-      const s = await authenticate();
-      return createECDSAMessageSigner(s.privateKey as Hex);
+    if (session && session.expiresAt.getTime() > Date.now()) {
+      // Session is still valid
+      return createECDSAMessageSigner(session.privateKey as Hex);
     }
-    return createECDSAMessageSigner(session.privateKey as Hex);
+    // Session Is Not Valid
+    const newSession = await authenticate();
+    return createECDSAMessageSigner(newSession.privateKey);
   };
 
   const authenticate = async () => {
@@ -33,6 +35,7 @@ export const useAuthenticate = () => {
     const s = {
       address: session.address,
       expiresAt,
+      jwtToken: session.jwtToken ?? "",
       privateKey: session.privateKey,
     };
 

@@ -12,4 +12,9 @@ export const queryKeys = createQueryKeyStore({
       queryKey: [walletAddress],
     }),
   },
+  unifiedBalance: {
+    get: (walletAddress?: Address) => ({
+      queryKey: [walletAddress],
+    }),
+  },
 });

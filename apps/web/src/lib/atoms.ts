@@ -1,11 +1,8 @@
 import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { Atom } from "@effect-atom/atom";
-import type { ApiKey } from "@yellow-rpc/schema";
 import { Schema } from "effect";
 
-export const userBalanceAtom = Atom.make<number>(0).pipe(Atom.keepAlive);
-
-export const apiKeys = Atom.make<ApiKey[]>([]).pipe(Atom.keepAlive);
+export const unifiedBalanceAtom = Atom.make<string>("0").pipe(Atom.keepAlive);
 
 const runtime = Atom.runtime(BrowserKeyValueStore.layerLocalStorage);
 
@@ -18,6 +15,7 @@ export const sessionAtom = Atom.kvs({
     Schema.Struct({
       address: Schema.String,
       expiresAt: Schema.Date,
+      jwtToken: Schema.String,
       privateKey: Schema.String,
     }),
   ),

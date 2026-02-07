@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { AddressSchema } from "@yellow-rpc/schema";
 import { Effect } from "effect";
@@ -30,40 +30,47 @@ export const WithdrawButton = () => {
   const { data: walletClient } = useWalletClient();
   const [amount, setAmount] = useState<string>("0");
 
-  const onWithdraw = () => {
-    const value = Number(amount);
-    if (Number.isNaN(value) || value <= 0) return;
-    if (!address) return;
-    if (!walletClient) return;
-    if (!appSession) return;
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      const value = Number(amount);
+      if (Number.isNaN(value) || value <= 0) return;
+      if (!address) return;
+      if (!walletClient) return;
+      if (!appSession) return;
 
-    const walletAddress = AddressSchema.make(address);
+      const walletAddress = AddressSchema.make(address);
 
-    const program = Effect.gen(function* () {
-      const client = yield* YellowRpcHttpClient;
+      const program = Effect.gen(function* () {
+        const client = yield* YellowRpcHttpClient;
 
-      const { success } = yield* client.session.withdraw({
-        payload: {
-          amount: value,
-          walletAddress: walletAddress,
-        },
+        const { success } = yield* client.session.withdraw({
+          payload: {
+            amount: value,
+            walletAddress: walletAddress,
+          },
+        });
+
+        if (!success) return Effect.fail(new Error("Failed to Withdraw Funds"));
+        return success;
       });
 
-      if (!success) return Effect.fail(new Error("Failed to Withdraw Funds"));
-      return success;
-    });
-
-    toast.promise(RuntimeClient.runPromise(program), {
-      error: "Failed to Withdraw Funds",
-      finally: async () => {
-        await queryClient.invalidateQueries({
-          ...queryKeys.appSession.get(walletAddress),
-        });
-      },
-      loading: "Withdrawing Funds...",
-      success: "Successfully Withdrawn Funds",
-    });
-  };
+      await toast.promise(RuntimeClient.runPromise(program), {
+        error: "Failed to Withdraw Funds",
+        finally: async () => {
+          await Promise.all([
+            queryClient.invalidateQueries({
+              ...queryKeys.unifiedBalance.get(address),
+            }),
+            queryClient.invalidateQueries({
+              ...queryKeys.appSession.get(address),
+            }),
+          ]);
+        },
+        loading: "Withdrawing Funds...",
+        success: "Successfully Withdrawn Funds",
+      });
+    },
+  });
 
   return (
     <Dialog>
@@ -79,6 +86,7 @@ export const WithdrawButton = () => {
           </DialogDescription>
           <Input
             className="reset-input-number"
+            disabled={withdrawMutation.isPending}
             max={appSession?.userBalance ?? 0}
             min={0}
             onChange={(e) => setAmount(e.target.value)}
@@ -86,7 +94,12 @@ export const WithdrawButton = () => {
             type="number"
             value={amount}
           />
-          <Button onClick={onWithdraw}>Withdraw</Button>
+          <Button
+            disabled={withdrawMutation.isPending}
+            onClick={() => withdrawMutation.mutateAsync()}
+          >
+            Withdraw
+          </Button>
         </DialogHeader>
       </DialogContent>
     </Dialog>

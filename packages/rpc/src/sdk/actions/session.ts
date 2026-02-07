@@ -30,13 +30,10 @@ export const createAppSession = async (
     participantSigners.map((s) => s(msgJson.req as RPCData)),
   );
 
-  console.log("Participant Sigs: ", participantSigs);
-
   const updatedMsgJson = {
     req: msgJson.req,
     sig: [...msgJson.sig, ...participantSigs],
   };
-  console.log("Message: ", updatedMsgJson);
   return (await client.sendMessage(JSON.stringify(updatedMsgJson))) as
     | CreateAppSessionResponse
     | ErrorResponse;
@@ -62,7 +59,6 @@ export const submitAppState = async (
     | SubmitAppStateResponse
     | ErrorResponse;
 
-  console.log("Submit App State Response: ", res);
   if (res.method === RPCMethod.Error) throw new Error(res.params.error);
 
   return res;

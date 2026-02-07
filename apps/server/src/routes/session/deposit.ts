@@ -85,7 +85,9 @@ export const depositFundsHandler = (data: DepositFundsRequest) =>
                 participant: admin.address,
               },
               {
-                amount: (appSession.userBalance + data.amount).toString(),
+                amount: Math.round(
+                  appSession.userBalance + data.amount,
+                ).toString(),
                 asset: appSession.asset,
                 participant: appSession.ownerAddress,
               },
