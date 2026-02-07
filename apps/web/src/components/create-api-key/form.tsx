@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { FetchHttpClient, HttpApiClient } from "@effect/platform";
 import { effectTsResolver } from "@hookform/resolvers/effect-ts";
 import {
   BellIcon,
@@ -9,7 +8,6 @@ import {
   CopyIcon,
 } from "@phosphor-icons/react";
 import {
-  api,
   type CreateApiKeyRequest,
   type CreateApiKeyRequestEncoded,
   CreateApiKeyRequestSchema,
@@ -43,6 +41,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { YellowRpcHttpClient } from "@/layers";
+import { RuntimeClient } from "@/lib/runtime";
 
 const chains = [
   {
@@ -62,7 +62,6 @@ const chains = [
   },
 ];
 
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: safe
 export const CreateApiKeyForm = () => {
   const { address } = useConnection();
   const { data: walletClient } = useWalletClient();
@@ -96,21 +95,14 @@ export const CreateApiKeyForm = () => {
     if (!address) return;
     if (!walletClient) return;
     const program = Effect.gen(function* () {
-      const client = yield* HttpApiClient.make(api, {
-        baseUrl: "http://localhost:8080",
-      });
-      yield* Effect.log("Creating Api Key");
+      const client = yield* YellowRpcHttpClient;
       const { apiKey } = yield* client.apiKey.create({
         payload: data,
       });
-
       return apiKey;
     });
 
-    const apiKey = await Effect.runPromise(
-      program.pipe(Effect.provide(FetchHttpClient.layer)),
-    );
-
+    const apiKey = await RuntimeClient.runPromise(program);
     setApiKey(apiKey);
   };
 

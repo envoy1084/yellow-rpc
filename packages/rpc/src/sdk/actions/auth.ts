@@ -4,12 +4,13 @@ import {
   type AuthRequestParams,
   createAuthRequestMessage,
   createAuthVerifyMessage,
+  createAuthVerifyMessageWithJWT,
   createEIP712AuthMessageSigner,
   type RPCAllowance,
   RPCMethod,
   type RPCResponse,
 } from "@erc7824/nitrolite";
-import type { WalletClient } from "viem";
+import type { Hex, WalletClient } from "viem";
 import type { Client } from "yellow-ts";
 
 import { generateSession, type Session } from "../helpers";
@@ -24,7 +25,7 @@ export const authenticate = (
   walletClient: WalletClient,
   props: AuthenticateProps,
   client: Client,
-): Promise<Session> => {
+): Promise<Session & { jwtToken?: string }> => {
   return new Promise(async (resolve, reject) => {
     let removeListener: (() => void) | undefined;
 
@@ -61,7 +62,10 @@ export const authenticate = (
           if (message.method === RPCMethod.AuthVerify) {
             if (removeListener) removeListener();
 
-            resolve(session);
+            resolve({
+              ...session,
+              jwtToken: message.params.jwtToken,
+            });
           }
 
           if (message.method === RPCMethod.Error) {
@@ -158,6 +162,44 @@ export const authenticateWithParams = (
       });
 
       await client.sendMessage(authMessage);
+    } catch (err) {
+      if (removeListener) removeListener();
+      reject(err);
+    }
+  });
+};
+
+export const authenticateWithJwt = (
+  jwtToken: string,
+  client: Client,
+): Promise<{ sessionKey: Hex }> => {
+  return new Promise(async (resolve, reject) => {
+    let removeListener: (() => void) | undefined;
+
+    try {
+      const authListener = (message: RPCResponse) => {
+        try {
+          if (message.method === RPCMethod.AuthVerify) {
+            if (removeListener) removeListener();
+            resolve({
+              sessionKey: message.params.sessionKey,
+            });
+          }
+
+          if (message.method === RPCMethod.Error) {
+            if (removeListener) removeListener();
+
+            reject(new Error(message.params.error));
+          }
+        } catch (innerErr) {
+          if (removeListener) removeListener();
+          reject(innerErr);
+        }
+      };
+
+      removeListener = client.listen(authListener);
+      const authVerifyMessage = await createAuthVerifyMessageWithJWT(jwtToken);
+      await client.sendMessage(authVerifyMessage);
     } catch (err) {
       if (removeListener) removeListener();
       reject(err);

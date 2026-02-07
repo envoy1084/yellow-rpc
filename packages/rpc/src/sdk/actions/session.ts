@@ -62,6 +62,7 @@ export const submitAppState = async (
     | SubmitAppStateResponse
     | ErrorResponse;
 
+  console.log("Submit App State Response: ", res);
   if (res.method === RPCMethod.Error) throw new Error(res.params.error);
 
   return res;

@@ -1,6 +1,6 @@
-import type { Session } from "@yellow-rpc/rpc";
+// import type { Session } from "@yellow-rpc/rpc";
 import { YellowClient } from "@yellow-rpc/rpc";
-import { Context, Duration, Effect, Layer, Redacted } from "effect";
+import { Context, Effect, Layer, Redacted } from "effect";
 import { createWalletClient, type Hex, http, type WalletClient } from "viem";
 import { type Address, privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
@@ -12,7 +12,6 @@ export class Admin extends Context.Tag("Admin")<
   {
     walletClient: WalletClient;
     client: YellowClient;
-    session: Session;
     address: Address;
   }
 >() {}
@@ -39,25 +38,25 @@ export const AdminLive = Layer.scoped(
       const address = account.address;
 
       // Start Authentication
-      const session = yield* Effect.promise(async () => {
-        await client.connect();
-        const session = await client.authenticate(walletClient, {
-          allowances: [],
-          application: "YellowRPC",
-          expiresAt: new Date(
-            Date.now() + Duration.toMillis(Duration.days(365)),
-          ), // 1 Year
-          scope: "yellow-rpc.com",
-        });
+      // const session = yield* Effect.promise(async () => {
+      //   await client.connect();
+      //   const session = await client.authenticate(walletClient, {
+      //     allowances: [],
+      //     application: "YellowRPC",
+      //     expiresAt: new Date(
+      //       Date.now() + Duration.toMillis(Duration.days(365)),
+      //     ), // 1 Year
+      //     scope: "yellow-rpc.com",
+      //   });
 
-        return session;
-      });
-      yield* Effect.log(
-        "Admin Authenticated Successfully, Session: ",
-        session.address,
-      );
+      //   return session;
+      // });
+      // yield* Effect.log(
+      //   "Admin Authenticated Successfully, Session: ",
+      //   session.address,
+      // );
 
-      return { address, client, session, walletClient };
+      return { address, client, walletClient };
     }),
     ({ client }) => Effect.promise(() => client.disconnect()),
   ),

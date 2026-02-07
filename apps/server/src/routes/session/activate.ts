@@ -43,14 +43,22 @@ export const activateAppSessionHandler = (data: ActivateAppSessionRequest) =>
       userSessionPrivateKey as Hex,
     );
 
-    // TODO: Create a new AppSession
+    const adminJwt = yield* encryption.decrypt(appSession.encAdminJwt);
+    const adminSessionPrivateKey = yield* encryption.decrypt(
+      appSession.adminEncSessionPrivateKey,
+    );
+    const adminSessionSigner = createECDSAMessageSigner(
+      adminSessionPrivateKey as Hex,
+    );
+
     const sessionParams = yield* Effect.tryPromise({
       catch: (e) =>
         new AppSessionCreationFailed({ message: (e as Error).message }),
-
       try: async () => {
+        await admin.client.authenticateWithJwt(adminJwt);
+
         const res = await admin.client.createAppSession(
-          admin.session.signer,
+          adminSessionSigner,
           [userSessionSigner],
           {
             allocations: [
@@ -61,7 +69,7 @@ export const activateAppSessionHandler = (data: ActivateAppSessionRequest) =>
               },
             ],
             definition: {
-              application: "YellowRPC",
+              application: `yellow-rpc-${data.id}`,
               challenge: 0, // No challenge period
               nonce: Date.now(), // Unique session identifier
               participants: [admin.address, data.walletAddress],

@@ -21,6 +21,10 @@ export class YellowClient extends Client {
     return await actions.authenticateWithParams(walletClient, authParams, this);
   }
 
+  async authenticateWithJwt(jwtToken: string) {
+    return await actions.authenticateWithJwt(jwtToken, this);
+  }
+
   async createAppSession(
     signer: MessageSigner,
     participantSigners: MessageSigner[],

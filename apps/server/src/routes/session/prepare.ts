@@ -6,14 +6,14 @@ import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import { generateSession } from "@yellow-rpc/rpc";
 import { AddressSchema, HexSchema } from "@yellow-rpc/schema";
 import { Duration, Effect } from "effect";
-import { zeroAddress } from "viem";
 
-import { Encryption } from "@/layers";
+import { Admin, Encryption } from "@/layers";
 
 export const prepareAppSessionHandler = (
   data: PrepareCreateAppSessionRequest,
 ) =>
   Effect.gen(function* () {
+    const admin = yield* Admin;
     const encryption = yield* Encryption;
     const appSessionRepo = yield* AppSessionRepository;
 
@@ -23,15 +23,32 @@ export const prepareAppSessionHandler = (
     );
 
     const id = crypto.randomUUID();
+
+    const adminSession = yield* Effect.promise(async () => {
+      const res = await admin.client.authenticate(admin.walletClient, {
+        allowances: [],
+        application: `yellow-rpc-${id}`,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 1 Year
+        scope: "yellow-rpc.com",
+      });
+      return res;
+    });
+
+    const encAdminSessionPrivateKey = yield* encryption.encrypt(
+      adminSession.privateKey,
+    );
+
+    const encAdminJwt = yield* encryption.encrypt(adminSession.jwtToken ?? "");
+
     yield* appSessionRepo
       .createAppSession(data.walletAddress, {
         adminBalance: 0,
-        adminEncSessionPrivateKey: "", // TODO: Generate Encrypted Session Private Key
-        adminSessionKey: AddressSchema.make(zeroAddress), // TODO: Generate Session Key
+        adminEncSessionPrivateKey: encAdminSessionPrivateKey,
+        adminSessionKey: AddressSchema.make(adminSession.address),
         appSessionId: HexSchema.make("0x0"), // Will be populated after creation
         asset: "ytest.usd",
         createdAt: new Date(),
-        encAdminJwt: "test",
+        encAdminJwt,
         expiresAt: new Date(),
         id,
         ownerAddress: AddressSchema.make(data.walletAddress),
@@ -67,7 +84,7 @@ export const prepareAppSessionHandler = (
           participant: data.walletAddress,
         },
       ],
-      application: "YellowRPC",
+      application: `yellow-rpc-${id}`,
       expires_at: expiresAt,
       scope: "yellow-rpc.com",
       session_key: userSession.address,

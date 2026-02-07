@@ -37,7 +37,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
           const key = `${suffix}:${data.id}`;
           const arrKey = `api_keys:${walletAddress}`;
           const encoded = Schema.encodeSync(ApiKeySchema)(data);
-          const reverseKey = `api_key_reverse:${data.hashedKey}}`;
+          const reverseKey = `api_key_reverse:${data.hashedKey}`;
           yield* redis.multi((tx) =>
             Effect.gen(function* () {
               // Add Api Key

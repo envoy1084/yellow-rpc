@@ -1,20 +1,39 @@
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useQuery } from "@tanstack/react-query";
+
 import { AddressSchema } from "@yellow-rpc/schema";
+import { Effect } from "effect";
 import { useConnection } from "wagmi";
 
-import { YellowRpcClient } from "@/lib/client";
+import { YellowRpcHttpClient } from "@/layers";
+import { queryKeys } from "@/lib/query";
+import { RuntimeClient } from "@/lib/runtime";
 
 export const useAppSession = () => {
   const { address } = useConnection();
 
-  const appSession = useAtomValue(
-    YellowRpcClient.query("session", "getSession", {
-      payload: {
-        walletAddress: address ? AddressSchema.make(address) : undefined,
-      },
-      reactivityKeys: ["app_session"],
-    }),
-  );
+  const appSession = useQuery({
+    queryFn: async () => {
+      if (!address) return null;
+
+      const walletAddress = AddressSchema.make(address);
+
+      const program = Effect.gen(function* () {
+        const client = yield* YellowRpcHttpClient;
+
+        const res = yield* client.session.getSession({
+          payload: { walletAddress },
+        });
+
+        return res.session;
+      });
+
+      const session = await RuntimeClient.runPromise(program);
+      return session;
+    },
+    ...queryKeys.appSession.get(
+      address ? AddressSchema.make(address) : undefined,
+    ),
+  });
 
   return appSession;
 };

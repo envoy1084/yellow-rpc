@@ -64,3 +64,5 @@ if newPending >= threshold then
 else
     return { 1, walletAddress } -- Success
 end`;
+
+export * from "./session";
