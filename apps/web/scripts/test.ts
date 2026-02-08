@@ -13,7 +13,7 @@ const measureExecutionTime = async <T>(
 
 const yellowRpcClient = createPublicClient({
   chain: mainnet,
-  transport: http("http://localhost:8080/rpc", {
+  transport: http("https://yellow-rpc.envoyos.xyz/rpc", {
     fetchOptions: {
       headers: {
         "x-api-key": process.env.YELLOW_API_KEY as string,
