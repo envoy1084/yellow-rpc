@@ -16,12 +16,17 @@ export const ConnectButton = () => {
   const { address } = useConnection();
   const connectors = useConnectors();
   const { mutateAsync: disconnect } = useDisconnect();
-  const { data: ensName } = useEnsName({ address });
+  const { data: ensName } = useEnsName({
+    address,
+  });
+
   const { data: ensAvatar } = useEnsAvatar({
     // biome-ignore lint/style/noNonNullAssertion: safe
     name: ensName!,
     query: { enabled: Boolean(ensName) },
   });
+
+  console.log({ address, ensAvatar, ensName });
 
   const handleConnection = async () => {
     if (address) {
@@ -30,7 +35,6 @@ export const ConnectButton = () => {
     }
     const connector = connectors[0];
     if (!connector) return;
-
     await connector.connect();
   };
 

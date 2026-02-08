@@ -16,6 +16,7 @@ export const sessionAtom = Atom.kvs({
       address: Schema.String,
       expiresAt: Schema.Date,
       jwtToken: Schema.String,
+      ownerAddress: Schema.String,
       privateKey: Schema.String,
     }),
   ),

@@ -2,14 +2,24 @@ import { createContext, type PropsWithChildren, useContext } from "react";
 
 import type { YellowClient } from "@yellow-rpc/rpc";
 
-import { useYellow } from "@/hooks";
+import { useUnifiedBalance, useYellow, useYellowEvents } from "@/hooks";
 
 const YellowContext = createContext<YellowClient | null>(null);
 
 export const YellowProvider = ({ children }: PropsWithChildren) => {
   const ws = useYellow();
 
-  return <YellowContext.Provider value={ws}>{children}</YellowContext.Provider>;
+  return (
+    <YellowContext.Provider value={ws}>
+      <YellowWrapper>{children}</YellowWrapper>
+    </YellowContext.Provider>
+  );
+};
+
+const YellowWrapper = ({ children }: PropsWithChildren) => {
+  useYellowEvents();
+  useUnifiedBalance();
+  return <>{children}</>;
 };
 
 export const useYellowClient = () => {

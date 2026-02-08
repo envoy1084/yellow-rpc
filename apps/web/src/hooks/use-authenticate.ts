@@ -13,7 +13,13 @@ export const useAuthenticate = () => {
   const setSession = useAtomSet(sessionAtom);
 
   const getSigner = async () => {
-    if (session && session.expiresAt.getTime() > Date.now()) {
+    if (
+      walletClient &&
+      session &&
+      session.expiresAt.getTime() > Date.now() &&
+      session.jwtToken !== "" &&
+      session.ownerAddress === walletClient.account.address
+    ) {
       // Session is still valid
       return createECDSAMessageSigner(session.privateKey as Hex);
     }
@@ -36,6 +42,7 @@ export const useAuthenticate = () => {
       address: session.address,
       expiresAt,
       jwtToken: session.jwtToken ?? "",
+      ownerAddress: walletClient.account.address,
       privateKey: session.privateKey,
     };
 

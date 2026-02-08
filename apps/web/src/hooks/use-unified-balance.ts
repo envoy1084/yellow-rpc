@@ -28,7 +28,9 @@ export const useUnifiedBalance = () => {
 
       if (res.method === RPCMethod.Error) {
         // Means we are not authenticated
-        if (session?.jwtToken) await ws.authenticateWithJwt(session.jwtToken);
+        if (session?.jwtToken && session.jwtToken !== "") {
+          await ws.authenticateWithJwt(session.jwtToken);
+        }
         // will success in next attempt
         throw new Error(res.params.error);
       }

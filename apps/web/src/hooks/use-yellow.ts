@@ -14,10 +14,12 @@ export const useYellow = () => {
 
   useEffect(() => {
     const ws = clientRef.current!;
-    ws.connect().catch(console.error);
+    ws.connect()
+      .catch(console.error)
+      .finally(() => console.log("Connected to Clearnet"));
 
     return () => {
-      ws.disconnect();
+      ws.disconnect().finally(() => console.log("Disconnected from Clearnet"));
     };
   }, []);
 
