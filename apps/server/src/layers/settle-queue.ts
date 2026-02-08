@@ -32,7 +32,9 @@ export const SettlementQueueLive = Layer.scoped(
     const worker = Effect.gen(function* () {
       while (true) {
         const walletAddress = yield* Queue.take(queue);
+        yield* Effect.log("Settling App Session...");
         yield* settleAppSession(walletAddress);
+        yield* Effect.log("App Session Settled");
         yield* Ref.update(processing, (s) => {
           s.delete(walletAddress);
           return s;

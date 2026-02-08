@@ -9,6 +9,7 @@ import { type Address, AddressSchema } from "@yellow-rpc/schema";
 import { Context, Effect, Layer } from "effect";
 
 import { chargeScript, updateAppSessionState } from "@/helpers";
+import { fromAtomic, toAtomic } from "@/helpers/currency";
 
 import { Admin } from "./admin";
 import { Hasher } from "./hash";
@@ -32,15 +33,15 @@ export const settleAppSession = (walletAddress: Address) =>
 
     yield* updateAppSessionState(walletAddress, {
       createNewAllocations: (appSession) => {
-        if (appSession.pendingSettlement === 0) return null;
+        if (appSession.pendingSettlement === 0n) return null;
         return [
           {
-            amount: appSession.adminBalance.toString(),
+            amount: fromAtomic(appSession.adminBalance),
             asset: appSession.asset,
             participant: admin.address,
           },
           {
-            amount: appSession.userBalance.toString(),
+            amount: fromAtomic(appSession.userBalance),
             asset: appSession.asset,
             participant: appSession.ownerAddress,
           },
@@ -61,8 +62,8 @@ export const SettlementLive = Layer.effect(
     const chargeApiKey = (apiKey: string) =>
       Effect.gen(function* () {
         const hashedKey = yield* hasher.hash(apiKey);
-        const cost = "0.01";
-        const threshold = "0.1";
+        const cost = toAtomic("0.01").toString();
+        const threshold = toAtomic("0.1").toString();
         const now = new Date().toISOString();
 
         // Run Lua Script to Charge App Session
@@ -79,6 +80,9 @@ export const SettlementLive = Layer.effect(
         // -- 1: Success
         // -- 2: Needs Settlement
         const [statusCode, walletAddress] = res as [number, `0x${string}`];
+
+        yield* Effect.log("statusCode", statusCode);
+        yield* Effect.log("walletAddress", walletAddress);
 
         if (statusCode === -1) return yield* Effect.fail(new ApiKeyNotFound());
         if (statusCode === -2) return yield* Effect.fail(new PaymentFailed());

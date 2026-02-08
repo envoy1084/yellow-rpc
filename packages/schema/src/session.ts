@@ -1,7 +1,7 @@
 /** biome-ignore-all assist/source/useSortedKeys: safe */
 import { Schema } from "effect";
 
-import { AddressSchema, HexSchema } from "./common";
+import { AddressSchema, BigIntFromString, HexSchema } from "./common";
 
 export const AppSessionSchema = Schema.Struct({
   // Unique Identifier for the App Session
@@ -12,12 +12,12 @@ export const AppSessionSchema = Schema.Struct({
   ownerAddress: AddressSchema,
   // Asset (ytest.usd, eth, usdc, etc)
   asset: Schema.String,
-  // Admin Balance
-  adminBalance: Schema.NumberFromString,
-  // User Balance
-  userBalance: Schema.NumberFromString,
-  // Pending Settlements
-  pendingSettlement: Schema.NumberFromString,
+  // Admin Balance in atomic units
+  adminBalance: BigIntFromString,
+  // User Balance in atomic units
+  userBalance: BigIntFromString,
+  // Pending Settlement in atomic units
+  pendingSettlement: BigIntFromString,
   // Session Status ()
   status: Schema.Literal(
     "open",
@@ -44,3 +44,4 @@ export const AppSessionSchema = Schema.Struct({
 });
 
 export type AppSession = typeof AppSessionSchema.Type;
+export type AppSessionE = typeof AppSessionSchema.Encoded;

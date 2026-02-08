@@ -11,6 +11,7 @@ import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import type { Hex } from "@yellow-rpc/schema";
 import { Effect, Option } from "effect";
 
+import { fromAtomic, toAtomic } from "@/helpers/currency";
 import { Admin, Encryption, settleAppSession } from "@/layers";
 
 export const depositFundsHandler = (data: DepositFundsRequest) =>
@@ -68,6 +69,9 @@ export const depositFundsHandler = (data: DepositFundsRequest) =>
       userSessionPrivateKey as Hex,
     );
 
+    const newUserBalance = appSession.userBalance + toAtomic(data.amount);
+    yield* Effect.log("newUserBalance", newUserBalance);
+    yield* Effect.log("Update AppSession...");
     const updateParams = yield* Effect.tryPromise({
       catch: (e) => {
         return new AppSessionUpdateFailed({ message: (e as Error).message });
@@ -80,12 +84,12 @@ export const depositFundsHandler = (data: DepositFundsRequest) =>
           {
             allocations: [
               {
-                amount: appSession.adminBalance.toString(),
+                amount: fromAtomic(appSession.adminBalance),
                 asset: appSession.asset,
                 participant: admin.address,
               },
               {
-                amount: (appSession.userBalance + data.amount).toString(),
+                amount: fromAtomic(newUserBalance),
                 asset: appSession.asset,
                 participant: appSession.ownerAddress,
               },
@@ -99,6 +103,7 @@ export const depositFundsHandler = (data: DepositFundsRequest) =>
         return updateRes.params;
       },
     });
+    console.log("updateParams", updateParams);
     // Handle Error, if the deposit fails, it can be due to following reasons:
     // 1. The user has insufficient funds
 
@@ -106,7 +111,7 @@ export const depositFundsHandler = (data: DepositFundsRequest) =>
       .updateAppSession(data.walletAddress, {
         appSessionId: appSession.appSessionId,
         status: updateParams.status,
-        userBalance: appSession.userBalance + data.amount,
+        userBalance: newUserBalance,
         version: updateParams.version,
       })
       .pipe(

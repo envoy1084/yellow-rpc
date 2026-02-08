@@ -6,7 +6,7 @@ export class YellowRpcClient extends AtomHttpApi.Tag<YellowRpcClient>()(
   "YellowRpcClient",
   {
     api: api,
-    baseUrl: "http://localhost:8080",
+    baseUrl: import.meta.env.VITE_YELLOW_RPC_BASE_URL,
     httpClient: FetchHttpClient.layer,
   },
 ) {}

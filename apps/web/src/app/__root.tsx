@@ -7,10 +7,12 @@ import { ProviderTree } from "@/providers";
 
 const RootComponent = () => {
   return (
-    <ProviderTree>
-      <Outlet />
-      <Toaster richColors={true} />
-    </ProviderTree>
+    <div>
+      <ProviderTree>
+        <Outlet />
+        <Toaster richColors={true} />
+      </ProviderTree>
+    </div>
   );
 };
 

@@ -33,7 +33,7 @@ export const prepareAppSessionHandler = (
     if (Option.isSome(existingAppSessionRes)) {
       const existingAppSession = existingAppSessionRes.value;
       const expiresAt = Math.floor(
-        new Date(Date.now() + Duration.toMillis(Duration.days(356))).getTime() /
+        new Date(Date.now() + Duration.toMillis(Duration.days(365))).getTime() /
           1000,
       );
 
@@ -77,7 +77,7 @@ export const prepareAppSessionHandler = (
 
     yield* appSessionRepo
       .createAppSession(data.walletAddress, {
-        adminBalance: 0,
+        adminBalance: 0n,
         adminEncSessionPrivateKey: encAdminSessionPrivateKey,
         adminSessionKey: AddressSchema.make(adminSession.address),
         appSessionId: HexSchema.make("0x0"), // Will be populated after creation
@@ -87,10 +87,10 @@ export const prepareAppSessionHandler = (
         expiresAt: new Date(),
         id,
         ownerAddress: AddressSchema.make(data.walletAddress),
-        pendingSettlement: 0,
+        pendingSettlement: 0n,
         status: "inactive",
         updatedAt: new Date(),
-        userBalance: 0,
+        userBalance: 0n,
         userEncSessionPrivateKey: encUserSessionPrivateKey,
         userSessionKey: AddressSchema.make(userSession.address),
         version: 0,

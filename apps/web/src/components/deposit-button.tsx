@@ -33,8 +33,8 @@ export const DepositButton = () => {
 
   const depositMutation = useMutation({
     mutationFn: async () => {
-      const value = Number(amount);
-      if (Number.isNaN(value) || value <= 0) return;
+      const value = amount;
+      if (Number.isNaN(value)) return;
       if (!address) return;
       if (!walletClient) return;
       if (!appSession) return;
@@ -52,7 +52,7 @@ export const DepositButton = () => {
           const res = await ws.authenticate(walletClient, {
             allowances: [
               {
-                amount: value.toString(),
+                amount: value,
                 asset: appSession.asset,
               },
             ],
@@ -100,28 +100,28 @@ export const DepositButton = () => {
       <DialogTrigger render={<Button variant="outline" />}>
         Deposit Funds
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="p-5">
         <DialogHeader>
           <DialogTitle>Deposit Funds</DialogTitle>
           <DialogDescription>
             Deposit funds from your unified balance to your app session. you can
             withdraw funds at any time.
           </DialogDescription>
-          <Input
-            className="reset-input-number"
-            disabled={depositMutation.isPending}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount"
-            type="number"
-            value={amount}
-          />
-          <Button
-            disabled={depositMutation.isPending}
-            onClick={() => depositMutation.mutateAsync()}
-          >
-            Deposit
-          </Button>
         </DialogHeader>
+        <Input
+          className="reset-input-number"
+          disabled={depositMutation.isPending}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Amount"
+          type="number"
+          value={amount}
+        />
+        <Button
+          disabled={depositMutation.isPending}
+          onClick={() => depositMutation.mutateAsync()}
+        >
+          Deposit
+        </Button>
       </DialogContent>
     </Dialog>
   );

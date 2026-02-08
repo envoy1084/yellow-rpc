@@ -23,3 +23,17 @@ export const HexSchema = hexSchema(null, "Hex");
 
 export type Address = typeof AddressSchema.Type;
 export type Hex = typeof HexSchema.Type;
+
+// Custom Schema: Handles "100" <-> 100n AND empty string "" -> 0n
+export const BigIntFromString = Schema.transform(
+  Schema.String,
+  Schema.BigIntFromSelf,
+  {
+    decode: (str) => {
+      if (str === "") return 0n;
+      return BigInt(str);
+    },
+    encode: (n) => n.toString(),
+    strict: true,
+  },
+);

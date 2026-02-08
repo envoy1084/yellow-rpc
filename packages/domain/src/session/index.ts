@@ -50,8 +50,20 @@ export const AppSessionRepositoryLive = Layer.effect(
           const encodedChanges = Object.fromEntries(
             Object.entries({
               ...changes,
+              adminBalance:
+                changes.adminBalance !== undefined
+                  ? changes.adminBalance.toString()
+                  : undefined,
               createdAt: changes.createdAt?.toISOString(),
+              pendingSettlement:
+                changes.pendingSettlement !== undefined
+                  ? changes.pendingSettlement.toString()
+                  : undefined,
               updatedAt: new Date().toISOString(),
+              userBalance:
+                changes.userBalance !== undefined
+                  ? changes.userBalance.toString()
+                  : undefined,
             }).filter(([_, v]) => v !== undefined),
           ) as Record<string, string>;
           yield* redis.hSet(key, encodedChanges);

@@ -12,6 +12,7 @@ import { AppSessionRepository } from "@yellow-rpc/domain/session";
 import type { Hex } from "@yellow-rpc/schema";
 import { Effect, Option } from "effect";
 
+import { fromAtomic, toAtomic } from "@/helpers/currency";
 import { Admin, Encryption, settleAppSession } from "@/layers";
 
 export const withdrawFundsHandler = (data: WithdrawFundsRequest) =>
@@ -52,7 +53,9 @@ export const withdrawFundsHandler = (data: WithdrawFundsRequest) =>
       userSessionPrivateKey as Hex,
     );
 
-    const canWithdraw = appSession.userBalance - data.amount >= 0;
+    const newUserBalance = appSession.userBalance - toAtomic(data.amount);
+
+    const canWithdraw = newUserBalance >= 0n;
     if (!canWithdraw) {
       return yield* Effect.fail(
         new InsufficientAvailableBalance({
@@ -78,7 +81,7 @@ export const withdrawFundsHandler = (data: WithdrawFundsRequest) =>
                 participant: admin.address,
               },
               {
-                amount: (appSession.userBalance - data.amount).toString(),
+                amount: fromAtomic(newUserBalance),
                 asset: appSession.asset,
                 participant: appSession.ownerAddress,
               },
@@ -99,7 +102,7 @@ export const withdrawFundsHandler = (data: WithdrawFundsRequest) =>
       .updateAppSession(data.walletAddress, {
         appSessionId: appSession.appSessionId,
         status: updateParams.status,
-        userBalance: appSession.userBalance - data.amount,
+        userBalance: newUserBalance,
         version: updateParams.version,
       })
       .pipe(

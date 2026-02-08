@@ -29,7 +29,7 @@ export const GetAppSessionResponseSchema = Schema.Struct({
 });
 
 export const DepositFundsRequestSchema = Schema.Struct({
-  amount: Schema.NumberFromString,
+  amount: Schema.String,
   sessionKey: AddressSchema,
   sessionPrivateKey: HexSchema,
   walletAddress: AddressSchema,
@@ -40,7 +40,7 @@ export const DepositFundsResponseSchema = Schema.Struct({
 });
 
 export const WithdrawFundsRequestSchema = Schema.Struct({
-  amount: Schema.NumberFromString,
+  amount: Schema.String,
   walletAddress: AddressSchema,
 });
 

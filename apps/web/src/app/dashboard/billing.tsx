@@ -8,6 +8,7 @@ import { CopyButton, DepositButton, WithdrawButton } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAppSession } from "@/hooks";
+import { formatUsd } from "@/lib/currency";
 
 export const BillingPage = () => {
   const { data: appSession } = useAppSession();
@@ -15,20 +16,22 @@ export const BillingPage = () => {
   const consumed = useMemo(() => {
     if (!appSession) return { percentage: "0", total: "0", value: "0" };
 
-    const user = Math.round(appSession.userBalance * 100);
-    const admin = Math.round(appSession.adminBalance * 100);
+    const user = appSession.userBalance;
+    const admin = appSession.adminBalance;
 
     const total = user + admin;
-    if (user === 0) {
+    if (user === 0n) {
       return { percentage: "0", total: "0", value: "0" };
+
+      // 10*1e6/100*1e6 = 10
     }
     const consumed = total - user;
-    const percent = ((consumed / total) * 100).toFixed(2);
+    const percent = (Number((consumed * 1000n) / total) / 100).toString();
 
     return {
       percentage: percent,
-      total: (total / 100).toFixed(2),
-      value: (consumed / 100).toFixed(2),
+      total: formatUsd(total),
+      value: formatUsd(consumed),
     };
   }, [appSession]);
 
@@ -43,9 +46,9 @@ export const BillingPage = () => {
           </Badge>
         </div>
         <div className="flex flex-row items-center gap-1">
-          <span className="text">${consumed.value} used</span>
+          <span className="text">{consumed.value} used</span>
           <span className="text-muted-foreground">
-            / ${consumed.total} available
+            / {consumed.total} available
           </span>
         </div>
         <Progress value={Number(consumed.percentage)} />

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAppSession } from "@/hooks";
 import { YellowRpcHttpClient } from "@/layers";
+import { fromAtomic } from "@/lib/currency";
 import { queryKeys } from "@/lib/query";
 import { RuntimeClient } from "@/lib/runtime";
 
@@ -45,7 +46,7 @@ export const WithdrawButton = () => {
 
         const { success } = yield* client.session.withdraw({
           payload: {
-            amount: value,
+            amount: value.toString(),
             walletAddress: walletAddress,
           },
         });
@@ -87,7 +88,7 @@ export const WithdrawButton = () => {
           <Input
             className="reset-input-number"
             disabled={withdrawMutation.isPending}
-            max={appSession?.userBalance ?? 0}
+            max={fromAtomic(appSession?.userBalance ?? 0n)}
             min={0}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount"

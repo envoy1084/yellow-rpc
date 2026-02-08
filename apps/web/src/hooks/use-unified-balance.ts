@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { RPCMethod } from "@erc7824/nitrolite";
 import { useConnection } from "wagmi";
 
-import { sessionAtom, unifiedBalanceAtom } from "@/lib/atoms";
+import { sessionAtom } from "@/lib/atoms";
 import { queryKeys } from "@/lib/query";
 import { useYellowClient } from "@/providers/yellow";
 
@@ -18,7 +18,6 @@ export const useUnifiedBalance = () => {
   const { data: appSession } = useAppSession();
 
   const session = useAtomValue(sessionAtom);
-  const setUnifiedBalance = useAtomSet(unifiedBalanceAtom);
 
   useQuery({
     enabled: Boolean(address) && Boolean(appSession),
@@ -34,20 +33,8 @@ export const useUnifiedBalance = () => {
         throw new Error(res.params.error);
       }
 
-      const amount = Number(
-        res.params.ledgerBalances.find((b) => b.asset === "ytest.usd")
-          ?.amount ?? "0",
-      );
-
-      const formattedCurrency = new Intl.NumberFormat("en-US", {
-        currency: "USD",
-        style: "currency",
-      }).format(amount);
-      setUnifiedBalance(formattedCurrency);
-
-      return amount;
+      return res;
     },
-    refetchInterval: 60 * 1000, // 10 sec
     ...queryKeys.unifiedBalance.get(address),
   });
 };

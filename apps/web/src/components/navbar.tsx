@@ -14,17 +14,17 @@ const pageTitles: Record<string, string> = {
 export const DashboardNavbar = () => {
   const { pathname } = useLocation();
   return (
-    <nav className="flex justify-between items-center gap-2 border-b h-12 px-4">
+    <div className="flex justify-between items-center gap-2 border-b h-12 px-4">
       <div className="flex flex-row items-center gap-2">
         <SidebarTrigger />
-        <div className="text-muted-foreground border-r h-5" />
+        <div className="text-muted-foreground border-r h-5 md:block hidden" />
         <div>{pageTitles[pathname] ?? "Dashboard"}</div>
       </div>
-      <div className="flex flex-row items-center gap-2">
+      <div className="md:flex flex-row items-center gap-2  hidden">
         <ThemeSwitcher />
         <ConnectButton />
         <BalancePill />
       </div>
-    </nav>
+    </div>
   );
 };

@@ -57,6 +57,7 @@ export const updateAppSessionState = (
     const newAllocations = props.createNewAllocations(appSession);
     if (newAllocations === null) return void 0;
 
+    yield* Effect.log("Update AppSession...");
     const updateRes = yield* Effect.tryPromise({
       catch: (e) =>
         new AppSessionUpdateFailed({ message: (e as Error).message }),
@@ -83,6 +84,7 @@ export const updateAppSessionState = (
         } as const),
       ),
     );
+    yield* Effect.log("updateRes", updateRes);
 
     if (!updateRes.success) {
       // App Settlement fails due to following reasons:
@@ -104,7 +106,7 @@ export const updateAppSessionState = (
     // Update AppSession
     yield* appSessionRepo
       .updateAppSession(appSession.ownerAddress, {
-        pendingSettlement: 0,
+        pendingSettlement: 0n,
         status: updateRes.response.params.status,
         version: updateRes.response.params.version,
       })

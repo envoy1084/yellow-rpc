@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ApiKeyList, CreateApiKey, MetricCard } from "@/components";
 import { useApiKeys, useAppSession } from "@/hooks";
+import { formatUsd } from "@/lib/currency";
 
 const DashboardPage = () => {
   const { data: apiKeys } = useApiKeys();
@@ -9,16 +10,16 @@ const DashboardPage = () => {
 
   return (
     <div className="max-w-7xl w-full mx-auto px-4 flex flex-col gap-10">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <MetricCard
           description="Available Balance for the App Session"
           title="Session Balance"
-          value={`$${(appSession?.userBalance ?? 0).toFixed(2)}`}
+          value={formatUsd(appSession?.userBalance)}
         />
         <MetricCard
           description="Pending Settlement for API usage"
           title="Pending Settlement"
-          value={`$${(appSession?.pendingSettlement ?? 0).toFixed(2)}`}
+          value={formatUsd(appSession?.pendingSettlement)}
         />
         <MetricCard
           description="Total API Keys created"

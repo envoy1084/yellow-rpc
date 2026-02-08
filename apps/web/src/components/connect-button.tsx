@@ -31,10 +31,7 @@ export const ConnectButton = () => {
     const connector = connectors[0];
     if (!connector) return;
 
-    const res = await connector.connect();
-    const connectedAddress = res.accounts[0];
-    if (!connectedAddress) return;
-    // TODO: Create User if not exists
+    await connector.connect();
   };
 
   return (
