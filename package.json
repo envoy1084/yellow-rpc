@@ -23,6 +23,6 @@
     "lint": "pnpm exec biome check --write",
     "lint:check": "pnpm exec biome check",
     "lint:write": "turbo lint:write",
-    "prepare": "lefthook install"
+    "prepare": "if [ \"$SKIP_LEFTHOOK\" = \"true\" ] || [ \"$CI\" = \"true\" ]; then echo 'Skipping lefthook'; else lefthook install; fi"
   }
 }
