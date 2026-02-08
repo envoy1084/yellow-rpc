@@ -15,14 +15,14 @@ import {
 
 const sidebarItems = [
   {
-    href: "/dashboard",
+    href: "/",
     icon: CommandIcon,
     key: "dashboard",
     label: "Dashboard",
     tooltip: "Dashboard",
   },
   {
-    href: "/dashboard/billing",
+    href: "/billing",
     icon: MoneyIcon,
     key: "billings",
     label: "Billings",
@@ -37,7 +37,7 @@ export const AppSidebar = () => {
         <SidebarMenuItem>
           <SidebarMenuButton
             className="hover:bg-sidebar! justify-start group-data-[collapsible=icon]:p-px!"
-            render={<Link to="/dashboard" />}
+            render={<Link to="/" />}
           >
             <YellowRPCIcon className="size-7! rounded-sm" />
             <span className="text-lg font-medium">YellowRPC</span>

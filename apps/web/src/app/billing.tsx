@@ -90,6 +90,6 @@ export const BillingPage = () => {
   );
 };
 
-export const Route = createFileRoute("/dashboard/billing")({
+export const Route = createFileRoute("/billing")({
   component: BillingPage,
 });
