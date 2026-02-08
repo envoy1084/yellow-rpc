@@ -17,6 +17,7 @@ export class ApiKeyRepository extends Context.Tag("ApiKeyRepository")<
     deleteApiKey: (
       id: string,
       walletAddress: string,
+      hashedKey: string,
     ) => Effect.Effect<void, RedisError>;
     listApiKeys: (walletAddress: string) => Effect.Effect<ApiKey[], RedisError>;
     getApiKeyByHash: (
@@ -49,7 +50,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
             }),
           );
         }),
-      deleteApiKey: (id, walletAddress) =>
+      deleteApiKey: (id, walletAddress, hashedKey) =>
         Effect.gen(function* () {
           const key = `${suffix}:${id}`;
           const arrKey = `api_keys:${walletAddress}`;
@@ -61,7 +62,7 @@ export const ApiKeyRepositoryLive = Layer.effect(
               // Remove Api Key from List
               yield* tx.sRem(arrKey, id);
               // Remove Reverse Lookup
-              yield* tx.del(`api_key_reverse:${id}`);
+              yield* tx.del(`api_key_reverse:${hashedKey}`);
             }),
           );
         }),

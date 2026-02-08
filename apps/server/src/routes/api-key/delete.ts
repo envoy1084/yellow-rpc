@@ -7,7 +7,7 @@ export const deleteApiKeyHandler = (data: DeleteApiKeyRequest) =>
     const apiKeyRepo = yield* ApiKeyRepository;
 
     yield* apiKeyRepo
-      .deleteApiKey(data.id, data.walletAddress)
+      .deleteApiKey(data.id, data.walletAddress, data.hashedKey)
       .pipe(Effect.catchAll(() => Effect.fail(new ApiKeyNotFound())));
 
     return { success: true };

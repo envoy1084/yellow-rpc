@@ -2,6 +2,15 @@
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
+const measureExecutionTime = async <T>(
+  fn: () => Promise<T>,
+): Promise<{ result: T; time: number }> => {
+  const start = performance.now();
+  const res = await fn();
+  const end = performance.now();
+  return { result: res, time: end - start };
+};
+
 const yellowRpcClient = createPublicClient({
   chain: mainnet,
   transport: http("http://localhost:8080/rpc", {
@@ -18,30 +27,50 @@ const alchemyClient = createPublicClient({
   transport: http(process.env.ALCHEMY_RPC_URL as string),
 });
 
-// Benchmarks
-console.time("start:yellow-first");
-await yellowRpcClient.getBalance({
-  address: "0xc0d86456F6f2930b892f3DAD007CDBE32c081FE6",
-});
-console.timeEnd("start:yellow-first");
+const yellowFirst = await measureExecutionTime(() =>
+  yellowRpcClient.getBalance({
+    address: "0xc0d86456F6f2930b892f3DAD007CDBE32c081FE6",
+  }),
+);
 
-console.time("start:yellow-second");
-await yellowRpcClient.getBalance({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-});
-console.timeEnd("start:yellow-second");
+const alchemyFirst = await measureExecutionTime(() =>
+  alchemyClient.getBalance({
+    address: "0xc0d86456F6f2930b892f3DAD007CDBE32c081FE6",
+  }),
+);
 
-console.time("start:alchemy-first");
-await alchemyClient.getBalance({
-  address: "0xc0d86456F6f2930b892f3DAD007CDBE32c081FE6",
-});
-console.timeEnd("start:alchemy-first");
+const yellowSecond = await measureExecutionTime(() =>
+  yellowRpcClient.getBalance({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  }),
+);
 
-console.time("start:alchemy-second");
-await alchemyClient.getBalance({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-});
-console.timeEnd("start:alchemy-second");
+const alchemySecond = await measureExecutionTime(() =>
+  alchemyClient.getBalance({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  }),
+);
+
+console.log(
+  `\nYellow RPC First Request took ${yellowFirst.time.toFixed(2)}ms\nResult: ${yellowFirst.result}`,
+);
+console.log(
+  `\nAlchemy First Request took ${alchemyFirst.time.toFixed(2)}ms\nResult: ${alchemyFirst.result}`,
+);
+
+console.log(
+  `\nYellow RPC Second Request took ${yellowSecond.time.toFixed(2)}ms\nResult: ${yellowSecond.result}`,
+);
+console.log(
+  `\nAlchemy Second Request took ${alchemySecond.time.toFixed(2)}ms\nResult: ${alchemySecond.result}`,
+);
+
+console.log(
+  `\nFirst Request Overhead: ${(yellowFirst.time - alchemyFirst.time).toFixed(2)}ms`,
+);
+console.log(
+  `Second Request Overhead: ${(yellowSecond.time - alchemySecond.time).toFixed(2)}ms`,
+);
 
 // Yellow RPC
 // - First Request: 300-350ms

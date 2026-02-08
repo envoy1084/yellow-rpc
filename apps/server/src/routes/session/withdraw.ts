@@ -78,9 +78,7 @@ export const withdrawFundsHandler = (data: WithdrawFundsRequest) =>
                 participant: admin.address,
               },
               {
-                amount: Math.round(
-                  appSession.userBalance - data.amount,
-                ).toString(),
+                amount: (appSession.userBalance - data.amount).toString(),
                 asset: appSession.asset,
                 participant: appSession.ownerAddress,
               },

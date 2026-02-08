@@ -61,9 +61,8 @@ export const CreateSession = () => {
 
   return (
     <QueryBoundary checkIsEmpty={() => false} query={appSession}>
-      {({ Loading, Success }) => (
+      {({ Success }) => (
         <>
-          <Loading>Loading...</Loading>
           <Success>
             {(session) => {
               if (!session || session.status === "inactive") {

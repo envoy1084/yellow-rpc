@@ -55,6 +55,7 @@
     "test": "vitest run"
   },
   "sideEffects": false,
+  "type": "module",
   "types": "./dist/index.d.mts",
   "version": "0.0.0"
 }

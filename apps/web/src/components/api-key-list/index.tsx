@@ -62,7 +62,7 @@ const ActionsCell = ({ row }: { row: ApiKey }) => {
         const client = yield* YellowRpcHttpClient;
 
         const { success } = yield* client.apiKey.delete({
-          payload: { id, walletAddress },
+          payload: { hashedKey: row.hashedKey, id, walletAddress },
         });
 
         return success;

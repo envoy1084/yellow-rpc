@@ -18,6 +18,7 @@ export const CreateApiKeyResponseSchema = Schema.Struct({
 });
 
 export const DeleteApiKeyRequestSchema = Schema.Struct({
+  hashedKey: Schema.String,
   id: Schema.String,
   walletAddress: AddressSchema,
 });
